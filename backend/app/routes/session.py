@@ -97,7 +97,21 @@ def get_my_sessions(
     sessions = db.query(SessionModel).filter(
         SessionModel.teacher_id == teacher.id
     ).order_by(SessionModel.id.desc()).all()
-    return sessions
+
+    return [
+        SessionResponse(
+            session_id=s.id,
+            class_id=s.class_id,
+            teacher_id=s.teacher_id,
+            center_lat=s.center_lat,
+            center_long=s.center_long,
+            radius_meters=s.radius_meters,
+            form_fields=s.form_fields,
+            is_active=s.is_active,
+            start_time=s.start_time
+        )
+        for s in sessions
+    ]
 
 @router.post("/{session_id}/end", status_code=status.HTTP_200_OK)
 def end_session(
