@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import engine, Base
-import app.models
-from app.auth_routes import router as auth_router
-from app.session_routes import router as session_router
-from app.template_routes import router as template_router
-from app.attendance_routes import router as attendance_router
+from app.core.database import engine, Base
+import app.models.db_models
+from app.routes.auth import router as auth_router
+from app.routes.session import router as session_router
+from app.routes.template import router as template_router
+from app.routes.attendance import router as attendance_router
 
 # Auto-create tables in PostgreSQL database
 Base.metadata.create_all(bind=engine)

@@ -4,8 +4,8 @@ import os
 # Ensure backend folder is in path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from app.database import engine, SessionLocal
-from app.models import AttendanceRecord, Session as SessionModel, FormTemplate, Teacher
+from app.core.database import engine, SessionLocal
+from app.models.db_models import AttendanceRecord, Session as SessionModel, FormTemplate, Teacher
 
 def reset_all_data():
     """

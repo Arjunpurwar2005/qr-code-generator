@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from app.template_models import FormFieldSchema
+from app.schemas.template import FormFieldSchema
 
 class StartSessionRequest(BaseModel):
     """

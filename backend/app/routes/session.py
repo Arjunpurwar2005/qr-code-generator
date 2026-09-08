@@ -4,17 +4,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session as DBSession
 
-from app.database import get_db
-from app.models import Teacher, Session as SessionModel, FormTemplate, AttendanceRecord
-from app.auth_routes import get_current_user
-from app.session_models import (
+from app.core.database import get_db
+from app.models.db_models import Teacher, Session as SessionModel, FormTemplate, AttendanceRecord
+from app.routes.auth import get_current_user
+from app.schemas.session import (
     StartSessionRequest,
     SessionResponse,
     PublicSessionFormResponse,
     QRTokenResponse
 )
-from app.session_utils import generate_qr_token
-from app.excel_utils import generate_attendance_excel
+from app.utils.qr_token import generate_qr_token
+from app.utils.excel_export import generate_attendance_excel
 
 router = APIRouter(prefix="/session", tags=["Attendance Session"])
 

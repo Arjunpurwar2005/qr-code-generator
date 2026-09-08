@@ -1,7 +1,7 @@
 import io
 import pandas as pd
 from typing import List
-from app.models import AttendanceRecord
+from app.models.db_models import AttendanceRecord
 
 def generate_attendance_excel(session_id: int, class_id: str, records: List[AttendanceRecord]) -> io.BytesIO:
     """

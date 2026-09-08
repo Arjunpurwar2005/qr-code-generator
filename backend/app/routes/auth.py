@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.models import Teacher
-from app.auth_models import TeacherSignup, TeacherLogin, TokenResponse
-from app.auth_utils import (
+from app.core.database import get_db
+from app.models.db_models import Teacher
+from app.schemas.auth import TeacherSignup, TeacherLogin, TokenResponse
+from app.utils.security import (
     hash_password,
     verify_password,
     create_access_token,

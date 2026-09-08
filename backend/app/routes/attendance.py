@@ -3,11 +3,11 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session as DBSession
 
-from app.database import get_db
-from app.models import Session as SessionModel, AttendanceRecord
-from app.attendance_models import StudentAttendanceSubmitRequest, AttendanceSubmitResponse
-from app.session_utils import generate_qr_token, verify_qr_token
-from app.geofence_utils import is_within_geofence
+from app.core.database import get_db
+from app.models.db_models import Session as SessionModel, AttendanceRecord
+from app.schemas.attendance import StudentAttendanceSubmitRequest, AttendanceSubmitResponse
+from app.utils.qr_token import generate_qr_token, verify_qr_token
+from app.utils.geofence import is_within_geofence
 
 logger = logging.getLogger(__name__)
 

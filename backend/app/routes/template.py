@@ -2,10 +2,10 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session as DBSession
 
-from app.database import get_db
-from app.models import Teacher, FormTemplate
-from app.auth_routes import get_current_user
-from app.template_models import CreateTemplateRequest, TemplateResponse
+from app.core.database import get_db
+from app.models.db_models import Teacher, FormTemplate
+from app.routes.auth import get_current_user
+from app.schemas.template import CreateTemplateRequest, TemplateResponse
 
 router = APIRouter(prefix="/templates", tags=["Form Templates"])
 
