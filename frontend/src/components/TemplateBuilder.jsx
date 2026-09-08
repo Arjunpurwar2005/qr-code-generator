@@ -95,7 +95,7 @@ export default function TemplateBuilder({
           </div>
         </div>
 
-        {/* Create Template Form Builder Section */}
+        {/* Create Template Builder WITH Live Interactive Preview */}
         <AnimatePresence>
           {showBuilder && (
             <motion.section
@@ -119,138 +119,206 @@ export default function TemplateBuilder({
                   </button>
                 </div>
 
-                <form onSubmit={(e) => { onSaveTemplate?.(e); setShowBuilder(false); }} className="space-y-6">
-                  {/* Template Name */}
-                  <div className="space-y-1 max-w-md">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Template Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. CS301 Daily Attendance"
-                      value={newTemplateName}
-                      onChange={(e) => setNewTemplateName?.(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-rq-orange focus:ring-2 focus:ring-orange-100 outline-none text-slate-800 text-sm font-medium"
-                    />
-                  </div>
-
-                  {/* Attendance Fields Builder */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  {/* Left Column: Form Builder Inputs */}
+                  <form
+                    onSubmit={(e) => {
+                      onSaveTemplate?.(e);
+                      setShowBuilder(false);
+                    }}
+                    className="lg:col-span-7 space-y-6"
+                  >
+                    {/* Template Name Input */}
+                    <div className="space-y-1">
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        Attendance Fields
+                        Template Name <span className="text-red-500">*</span>
                       </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. CS301 Daily Attendance"
+                        value={newTemplateName}
+                        onChange={(e) => setNewTemplateName?.(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-rq-orange focus:ring-2 focus:ring-orange-100 outline-none text-slate-800 text-sm font-medium"
+                      />
+                    </div>
+
+                    {/* Attendance Fields List */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                          Attendance Fields
+                        </label>
+                        <button
+                          type="button"
+                          onClick={onAddField}
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-rq-navy font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">add</span>
+                          <span>+ Add Field</span>
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {builderFields?.map((field, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 relative"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-rq-navy">
+                                Field #{idx + 1}
+                              </span>
+                              {builderFields.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => onRemoveField?.(idx)}
+                                  className="text-red-500 hover:text-red-700 text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                                  <span>Remove</span>
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <input
+                                type="text"
+                                required
+                                placeholder="Field Label (e.g. Roll Number)"
+                                value={field.label}
+                                onChange={(e) => onFieldChange?.(idx, 'label', e.target.value)}
+                                className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-sm outline-none focus:border-rq-orange"
+                              />
+                              <select
+                                value={field.type}
+                                onChange={(e) => onFieldChange?.(idx, 'type', e.target.value)}
+                                className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-sm outline-none focus:border-rq-orange"
+                              >
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="dropdown">Dropdown Options</option>
+                              </select>
+                            </div>
+
+                            {field.type === 'dropdown' && (
+                              <input
+                                type="text"
+                                placeholder="Options separated by commas (e.g. Section A, Section B)"
+                                value={field.options}
+                                onChange={(e) => onFieldChange?.(idx, 'options', e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs outline-none focus:border-rq-orange"
+                              />
+                            )}
+
+                            <div className="flex items-center gap-6 pt-1 text-xs text-slate-600">
+                              <label className="flex items-center gap-2 cursor-pointer font-medium">
+                                <input
+                                  type="checkbox"
+                                  checked={field.required}
+                                  onChange={(e) => onFieldChange?.(idx, 'required', e.target.checked)}
+                                  className="rounded text-rq-orange focus:ring-rq-orange"
+                                />
+                                <span>Required</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer font-medium">
+                                <input
+                                  type="checkbox"
+                                  checked={field.is_unique_id}
+                                  onChange={(e) => onFieldChange?.(idx, 'is_unique_id', e.target.checked)}
+                                  className="rounded text-rq-orange focus:ring-rq-orange"
+                                />
+                                <span>Unique Roll Number</span>
+                              </label>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                       <button
                         type="button"
-                        onClick={onAddField}
-                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-rq-navy font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                        onClick={() => setShowBuilder(false)}
+                        className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition-colors cursor-pointer"
                       >
-                        <span className="material-symbols-outlined text-[16px]">add</span>
-                        <span>+ Add Field</span>
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2.5 rounded-xl bg-rq-navy hover:bg-slate-800 text-white font-manrope font-bold text-sm shadow-md transition-all cursor-pointer"
+                      >
+                        Save Template
                       </button>
                     </div>
+                  </form>
 
-                    <div className="space-y-3">
-                      {builderFields?.map((field, idx) => (
-                        <div
-                          key={idx}
-                          className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 relative"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold uppercase tracking-wider text-rq-navy">
-                              Field #{idx + 1}
-                            </span>
-                            {builderFields.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => onRemoveField?.(idx)}
-                                className="text-red-500 hover:text-red-700 text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">delete</span>
-                                <span>Remove</span>
-                              </button>
-                            )}
-                          </div>
+                  {/* Right Column: LIVE INTERACTIVE PREVIEW */}
+                  <div className="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800 space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span className="font-manrope font-bold text-xs uppercase tracking-wider text-slate-300">
+                          Live Student Form Preview
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-mono bg-slate-800 px-2 py-0.5 rounded">
+                        Mobile Mockup
+                      </span>
+                    </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input
-                              type="text"
-                              required
-                              placeholder="Field Name (e.g. Student Name)"
-                              value={field.label}
-                              onChange={(e) => onFieldChange?.(idx, 'label', e.target.value)}
-                              className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-sm outline-none focus:border-rq-orange"
-                            />
-                            <select
-                              value={field.type}
-                              onChange={(e) => onFieldChange?.(idx, 'type', e.target.value)}
-                              className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-sm outline-none focus:border-rq-orange"
-                            >
-                              <option value="text">Text</option>
-                              <option value="number">Number</option>
-                              <option value="dropdown">Dropdown Options</option>
+                    <div className="bg-white text-slate-800 rounded-xl p-4 shadow-inner space-y-3">
+                      <div className="border-b border-slate-100 pb-2">
+                        <div className="text-[10px] font-bold uppercase text-rq-orange tracking-wider">
+                          Mark Attendance
+                        </div>
+                        <div className="font-manrope font-bold text-sm text-rq-navy">
+                          {newTemplateName || 'Template Preview'}
+                        </div>
+                      </div>
+
+                      {builderFields?.map((f, fIdx) => (
+                        <div key={fIdx} className="space-y-1">
+                          <label className="block text-[10px] font-bold uppercase text-slate-600">
+                            {f.label || `Field ${fIdx + 1}`} {f.required ? <span className="text-red-500">*</span> : ''}
+                          </label>
+                          {f.type === 'dropdown' ? (
+                            <select disabled className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-slate-50 text-slate-400">
+                              <option>-- Select {f.label || 'Option'} --</option>
                             </select>
-                          </div>
-
-                          {field.type === 'dropdown' && (
+                          ) : (
                             <input
+                              disabled
                               type="text"
-                              placeholder="Options separated by commas (e.g. Section A, Section B)"
-                              value={field.options}
-                              onChange={(e) => onFieldChange?.(idx, 'options', e.target.value)}
-                              className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs outline-none focus:border-rq-orange"
+                              placeholder={`Enter ${f.label || 'value'}`}
+                              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-slate-50 text-slate-400"
                             />
                           )}
-
-                          <div className="flex items-center gap-6 pt-1 text-xs text-slate-600">
-                            <label className="flex items-center gap-2 cursor-pointer font-medium">
-                              <input
-                                type="checkbox"
-                                checked={field.required}
-                                onChange={(e) => onFieldChange?.(idx, 'required', e.target.checked)}
-                                className="rounded text-rq-orange focus:ring-rq-orange"
-                              />
-                              <span>Required</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer font-medium">
-                              <input
-                                type="checkbox"
-                                checked={field.is_unique_id}
-                                onChange={(e) => onFieldChange?.(idx, 'is_unique_id', e.target.checked)}
-                                className="rounded text-rq-orange focus:ring-rq-orange"
-                              />
-                              <span>Unique Roll Number</span>
-                            </label>
-                          </div>
                         </div>
                       ))}
-                    </div>
-                  </div>
 
-                  {/* Form Action Buttons */}
-                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => setShowBuilder(false)}
-                      className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition-colors cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-rq-navy hover:bg-slate-800 text-white font-manrope font-bold text-sm shadow-md transition-all cursor-pointer"
-                    >
-                      Save Template
-                    </button>
+                      <div className="pt-2">
+                        <button
+                          disabled
+                          className="w-full py-2 rounded-lg bg-rq-orange text-white font-manrope font-bold text-xs opacity-75 cursor-not-allowed"
+                        >
+                          Mark Attendance
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="text-[11px] text-slate-400 text-center">
+                      This is an interactive preview of how students will see the form when scanning your QR code.
+                    </p>
                   </div>
-                </form>
+                </div>
               </div>
             </motion.section>
           )}
         </AnimatePresence>
 
-        {/* Existing Templates Grid */}
+        {/* Saved Templates Grid */}
         <section className="space-y-4">
           <h2 className="font-manrope font-bold text-lg text-rq-navy flex items-center gap-2">
             <span className="material-symbols-outlined text-rq-orange">bookmark</span>
@@ -291,34 +359,45 @@ export default function TemplateBuilder({
                       {tmpl.fields?.map((f, fIdx) => (
                         <span
                           key={fIdx}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold"
+                          className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold"
                         >
                           {f.label} {f.required ? '*' : ''}
                         </span>
                       ))}
                     </div>
                   </div>
+
+                  <div className="pt-3 border-t border-slate-100">
+                    <button
+                      onClick={onNavigateDashboard}
+                      className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-rq-navy hover:text-white text-rq-navy font-manrope font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span>Use Template</span>
+                      <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center space-y-4">
-              <div className="w-14 h-14 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
-                <span className="material-symbols-outlined text-[28px]">bookmark_border</span>
+            /* Rich Illustrated Empty State for Templates */
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 sm:p-10 text-center space-y-4 relative overflow-hidden">
+              <div className="w-16 h-16 rounded-2xl bg-orange-50 text-rq-orange mx-auto flex items-center justify-center shadow-inner">
+                <span className="material-symbols-outlined text-[32px]">bookmark_add</span>
               </div>
-              <div className="max-w-md mx-auto space-y-1">
-                <h3 className="font-manrope font-bold text-lg text-rq-navy">No templates yet.</h3>
+              <div className="max-w-md mx-auto space-y-1.5">
+                <h3 className="font-manrope font-extrabold text-xl text-rq-navy">Create your first attendance template</h3>
                 <p className="text-slate-500 text-sm">
-                  Create a template once and reuse it for future attendance sessions.
+                  Save your class fields once and reuse them whenever you take attendance.
                 </p>
               </div>
-              <div>
+              <div className="pt-2">
                 <button
                   onClick={() => setShowBuilder(true)}
-                  className="px-6 py-2.5 rounded-xl bg-rq-orange hover:bg-orange-600 text-white font-manrope font-bold text-sm shadow-sm transition-all inline-flex items-center gap-2 cursor-pointer"
+                  className="px-6 py-3 rounded-xl bg-rq-orange hover:bg-orange-600 text-white font-manrope font-bold text-sm shadow-md transition-all inline-flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[18px]">add</span>
-                  <span>Create Template</span>
+                  <span>+ Create Template</span>
                 </button>
               </div>
             </div>
