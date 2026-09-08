@@ -1,155 +1,360 @@
-# RollQR — Professional UX Wireframe & User-Flow Specification
-
-> **Repository:** `Arjunpurwar2005/qr-code-generator`  
-> **Branch:** `feature/flow`  
-> **Target Audience:** Engineering Team, Product Managers, UI/UX Designers, College Administration  
-> **Version:** 2.0.0 (Production-Ready Architecture)  
+# ROLLQR
+## Professional UX Flow & Wireframe Specification
 
 ---
 
-## Executive Summary & System Overview
+## 01 — Product Overview
 
-**RollQR** is a high-security, location-verified classroom attendance platform built for higher education institutions (such as KCC Institute of Technology & Management - KCCITM). The system eliminates manual roll calls and proxy attendance by combining **rotating dynamic QR tokens** (refreshing every 18-20 seconds) with **GPS geofence radius verification** and **device-based hardware binding**.
+**RollQR** is an automated classroom attendance platform designed for educational institutions (specifically tailored for institutions like KCC Institute of Technology & Management — KCCITM). The application eliminates manual roll calls and paper sign-in sheets by providing a real-time classroom attendance mechanism based on **dynamic rolling QR codes**, **GPS campus geofencing**, and **customizable form templates**.
 
-### Key System Architecture Capabilities:
-1. **Teacher Control Center:** Start/end live attendance sessions, select custom attendance form presets, capture real-time instructor GPS coordinates, monitor live scan stats, and export attendance rosters instantly to Excel (`.xlsx`).
-2. **Student Attendance Interface:** Zero-app, browser-native mobile workflow. Students scan the live dynamic classroom QR code, allow GPS location capture, fill required template fields (Roll Number, Full Name, Section), and submit attendance.
-3. **Dynamic Form Builder & Templates:** Teachers create reusable form presets with custom validation rules (Text, Number, Dropdown, Unique Roll Number identifiers).
-4. **Institutional Security Layer:** Institution Admin Portal (`admin.html`) configures campus geographic centroids and geofence radii mapped to official college email domains (`@kccitm.edu.in`).
-
----
-
-## 1. Information Architecture & Sitemap
-
-### 1.1 Structural Area Classification
-
-| Area | Accessibility | Key Components & Purpose |
-| :--- | :--- | :--- |
-| **Public Portal** | Anyone | Landing Page (`/` - Marketing, Features, How-it-Works, FAQ) |
-| **Authentication** | Unauthenticated Teachers | Login / Signup (`/login` - Username/Password & Google OAuth 2.0) |
-| **Faculty Portal** | Authenticated Teachers (JWT) | Dashboard (`/dashboard`), Live QR (`/live`), Templates (`/templates`) |
-| **Student Scanner** | Anyone with Scan Link | Attendance Form (`/scan` or `/?session_id=X&qr_token=Y`) |
-| **Admin Portal** | System Administrators | Institution Geofence Management (`/admin.html` with `X-Admin-Secret`) |
+### Primary Value Proposition
+- **For Teachers:** Launch a live attendance session in under 10 seconds, project a dynamic rotating QR code, monitor attendance in real time, and download structured Excel spreadsheets (`.xlsx`) immediately after class.
+- **For Students:** Zero app installation required. Students scan the live classroom QR code with standard phone cameras, grant GPS location access to confirm physical presence, fill out required student details, and receive instant verification.
+- **For Institutions:** Prevent proxy attendance (buddies marking absent friends) through high-frequency rolling QR token validation, GPS distance boundaries, and device hardware binding.
 
 ---
 
-### 1.2 Sitemap Diagram (Visual Flow)
+## 02 — User Roles
 
-```mermaid
-flowchart TD
-    A[Public Landing Page /] -->|Click Login / Signup| B[Auth Portal /login]
-    A -->|Direct URL or Mobile Scan| C[Student Scanner /scan]
-    
-    B -->|Submit Credentials / Google SSO| D{JWT Auth Success?}
-    D -->|Yes| E[Teacher Dashboard /dashboard]
-    D -->|No| B
-    
-    E -->|Click + Start Attendance| F[Start Attendance Modal]
-    F -->|Capture GPS & Select Template| G[Live QR Control Room /live]
-    G -->|QR Refreshes Every 18s| G
-    G -->|Click End Attendance| H[End Session Modal / Summary]
-    H -->|Click Download Excel| I[Download .xlsx Roster]
-    H -->|Return| E
-    
-    E -->|Click Templates Nav| J[Template Builder /templates]
-    J -->|Create / Edit Fields| K[Live Student Form Preview]
-    K -->|Save Template| J
-    
-    C -->|URL: ?session_id=X&qr_token=Y| L[Fetch Public Form API]
-    L -->|Allow GPS Location| M[GPS Radius Check]
-    M -->|Fill Fields & Submit| N{Attendance Valid?}
-    N -->|Yes| O[Success Confirmation Screen]
-    N -->|No / Out of Range / Expired QR| P[Error Alert Screen]
+RollQR serves three distinct user personas with distinct operational permissions and journeys:
 
-    subgraph Admin Area
-        Q[Admin Portal admin.html] -->|Authenticate X-Admin-Secret| R[Manage Institutions & Campus Centroids]
-    end
+### 1. Teacher (Primary Operational User)
+- **Goal:** Quickly capture accurate classroom attendance without wasting lecture time.
+- **Key Actions:** Log in, create reusable form presets, capture GPS center location, launch live attendance sessions, monitor incoming scans, end sessions, and download `.xlsx` reports.
+- **Device Context:** Desktop / Laptop / Tablet projected onto classroom screen or smartboard.
+
+### 2. Student (End Respondent)
+- **Goal:** Mark attendance quickly and accurately from a personal mobile device.
+- **Key Actions:** Point phone camera at classroom screen, open URL, allow GPS browser location, fill required roll number and student details, submit, and view confirmation receipt.
+- **Device Context:** Mobile smartphones (iOS & Android) via web browser.
+
+### 3. Admin (Institutional Manager)
+- **Goal:** Configure campus locations and geographic boundaries to enforce institutional security.
+- **Key Actions:** Authenticate using secret admin credentials, register college email domains (`kccitm.edu.in`), set campus latitude/longitude centroids, define allowed geofence radii (meters), and view/delete registered campus boundaries.
+- **Device Context:** Desktop / Admin Terminal (`admin.html`).
+
+---
+
+## 03 — Information Architecture
+
+RollQR is structured into three isolated functional domains: Public/Auth Area, Faculty Command Area, and Student Response Interface.
+
+```text
+                                  ROLLQR ARCHITECTURE
+                                           │
+         ┌─────────────────────────────────┼─────────────────────────────────┐
+         │                                 │                                 │
+   PUBLIC / AUTH                    TEACHER PORTAL                    STUDENT SCANNER
+         │                                 │                                 │
+   ├── Landing Page                 ├── Dashboard                     └── Mobile Scan Page
+   └── Authentication               │     ├── Active Session Banner             ├── GPS Capture
+         ├── Login                  │     ├── Quick Action Cards            ├── Dynamic Fields
+         └── Signup                 │     └── Recent History Table          └── Attendance Submit
+                                    │                                             ├── Success Screen
+                                    ├── Start Session Setup                       └── Failure Alert
+                                    │     ├── Class Details
+                                    │     ├── Form Preset Selector
+                                    │     └── Geofence Radius
+                                    │
+                                    ├── Live QR Control Room
+                                    │     ├── Dynamic QR Reticle
+                                    │     ├── Refresh Countdown
+                                    │     └── Roster Summary
+                                    │
+                                    └── Template Builder
+                                          ├── Template Form Editor
+                                          ├── Live Student Preview
+                                          └── Saved Presets Grid
 ```
 
 ---
 
-### 1.3 Access Control & Route Protection Matrix
+## 04 — Sitemap
 
-| Route Path | Component / File | Access Requirement | Redirect on Unauthorized |
-| :--- | :--- | :--- | :--- |
-| `/` | `HomePage.jsx` | Public | None |
-| `/login` | `LoginSignup.jsx` | Unauthenticated | Redirects to `/dashboard` if token present |
-| `/dashboard` | `TeacherDashboard.jsx` | Teacher JWT Token | Redirects to `/login` |
-| `/live` | `LiveQRSession.jsx` | Teacher JWT + Active Session | Redirects to `/login` |
-| `/templates` | `TemplateBuilder.jsx` | Teacher JWT Token | Redirects to `/login` |
-| `/scan` | `StudentAttendanceForm.jsx` | Public (`session_id` query param) | Shows "Form Not Found" if invalid |
-| `/admin.html` | `admin.html` | `X-Admin-Secret` Header | Displays Connection Setup Card |
+```text
+Landing Page ( / )
+  ├── Login / Signup ( /login )
+  │     └── [ Authentication Success ] ──► Teacher Dashboard ( /dashboard )
+  │                                            ├── Start Attendance Modal
+  │                                            │     └── [ Launch ] ──► Live QR Control Room ( /live )
+  │                                            │                          └── [ End Session ] ──► Summary / Dashboard
+  │                                            ├── Templates ( /templates )
+  │                                            │     └── Create / Edit Template Form
+  │                                            └── Session History Section
+  │
+  ├── Student Mobile Scan ( /scan OR /?session_id=X&qr_token=Y )
+  │     ├── GPS Location Grant
+  │     ├── Fill Attendance Details
+  │     └── [ Submit ]
+  │           ├── Success Confirmation Screen
+  │           └── Failure / Error Alert Screen
+  │
+  └── Admin Portal ( /admin.html )
+        ├── Connect / Authenticate (Secret Key)
+        └── Institution Management (Campus Centroids & Geofencing)
+```
 
 ---
 
-## 2. Professional Low-to-Mid Fidelity Wireframes
+## 05 — User Flows (UX Journey)
 
-### Screen 1: Landing Page (`/` — `HomePage.jsx`)
+*Note: This section describes pure user actions and screen transitions from the perspective of the user ("What does the user do, and where does the user go next?"). For backend API, database, and technical sequence details, see Section 11.*
 
-#### Desktop View Layout
+### 5.1 Teacher Journey Flow
+
+```text
+Landing Page
+     ↓
+Login / Signup
+     ↓
+Authentication Success
+     ↓
+Teacher Dashboard
+     ↓
+Start Attendance
+     ↓
+Session Setup
+     ↓
+Capture Location
+     ↓
+Select Attendance Template
+     ↓
+Start Session
+     ↓
+Live QR Control Room
+     ↓
+Students Scan QR
+     ↓
+Attendance Count / Session Monitoring
+     ↓
+End Attendance
+     ↓
+Session Summary
+     ↓
+Download Excel
+     ↓
+Return to Dashboard
 ```
+
+#### Step-by-Step Screen Transitions:
+
+1. **Landing Page (`/`)**
+   - **User Action:** Clicks "Start Attendance" or "Login" in top navigation bar.
+   - **Result:** System navigates user to Auth Portal.
+   - **Next Screen:** Login / Signup (`/login`).
+
+2. **Login / Signup (`/login`)**
+   - **User Action:** Enters username & password and clicks "Login ->", OR clicks "Sign in with Google".
+   - **Result:** Credentials validated, teacher session activated.
+   - **Next Screen:** Teacher Dashboard (`/dashboard`).
+
+3. **Teacher Dashboard (`/dashboard`)**
+   - **User Action:** Clicks "+ Start Attendance" primary action button.
+   - **Result:** Start Attendance Modal overlay opens on screen.
+   - **Next Screen:** Session Setup Modal.
+
+4. **Session Setup Modal**
+   - **User Action:** Enters Subject/Class name (e.g., "CS301"), selects an Attendance Form Preset, inputs Geofence Radius (e.g., "30 meters"), clicks "📍 Capture GPS Center Location", then clicks "Start Session & Open Live QR".
+   - **Result:** Session initialized with captured GPS center. Modal closes and switches view.
+   - **Next Screen:** Live QR Control Room (`/live`).
+
+5. **Live QR Control Room (`/live`)**
+   - **User Action:** Displays screen to classroom. Monitors the dynamic rotating QR code and auto-refresh countdown timer.
+   - **Result:** Students scan and submit attendance. Roster updates.
+   - **Next Screen:** Live QR Control Room (Active State).
+
+6. **Ending Session**
+   - **User Action:** Clicks "End Attendance" button.
+   - **Result:** End Session confirmation dialog appears.
+   - **Next Screen:** Confirmation Dialog -> Clicks "End Attendance Now".
+
+7. **Session Summary State (`/live`)**
+   - **User Action:** Views total present student roster count. Clicks "Download Excel Report".
+   - **Result:** System downloads `.xlsx` spreadsheet directly to teacher's computer.
+   - **Next Screen:** Clicks "Back to Dashboard" -> Teacher Dashboard (`/dashboard`).
+
+---
+
+### 5.2 Student Journey Flow
+
+```text
+Classroom QR
+     ↓
+Scan QR
+     ↓
+Attendance Page
+     ↓
+Session Validation
+     ↓
+Allow Location
+     ↓
+GPS Verification
+     ↓
+Attendance Form
+     ↓
+Enter Details
+     ↓
+Submit Attendance
+     ↓
+Validation
+   ↙       ↘
+Success    Failure
+   ↓         ↓
+Success    Error
+Screen     Screen
+```
+
+#### Step-by-Step Screen Transitions & Failure Scenarios:
+
+1. **Scanning QR**
+   - **User Action:** Student points phone camera at classroom projection screen and taps the pop-up URL link.
+   - **Result:** Phone web browser opens the attendance link.
+   - **Next Screen:** Student Attendance Form (`/scan?session_id=X&qr_token=Y`).
+
+2. **Granting Location Access**
+   - **User Action:** Student taps "📍 Allow & Grab My Location" button.
+   - **Result:** Phone requests browser location permission; GPS coordinates captured.
+   - **Next Screen:** Button turns green showing "GPS Verified".
+
+3. **Filling & Submitting Form**
+   - **User Action:** Fills out Roll Number, Full Name, and any custom template fields (e.g., Section), then taps "Mark Attendance".
+   - **Result:** Submission evaluated against session rules.
+
+#### Failure Scenarios (Supported Logic):
+
+- **Scenario A — QR Token Expired:**
+  - *User Experience:* Student submits with an old QR token after timer rotation.
+  - *Screen Action:* Show Red Banner: `"Invalid or expired QR token. Please scan current QR on screen."`
+  - *Next Action:* Student scans the updated QR code currently on the projection screen.
+
+- **Scenario B — Student Outside Geofence Boundary:**
+  - *User Experience:* Student attempts to submit from outside classroom/campus radius.
+  - *Screen Action:* Show Red Banner: `"Location verification failed: You are outside allowed classroom radius."`
+  - *Next Action:* Student moves physically inside classroom and taps "Retry GPS".
+
+- **Scenario C — Duplicate Roll Number Submission:**
+  - *User Experience:* Student attempts to submit a Roll Number that has already been recorded for this session.
+  - *Screen Action:* Show Red Banner: `"Attendance already submitted for Roll Number X."`
+  - *Next Action:* Form entry blocked to prevent proxy submission.
+
+- **Scenario D — Inactive / Ended Session:**
+  - *User Experience:* Student scans link after teacher has clicked "End Attendance".
+  - *Screen Action:* Display Disabled Form View: `"This attendance session has ended. Submissions are closed."`
+
+---
+
+### 5.3 Admin Journey Flow
+
+```text
+Admin Portal ( admin.html )
+     ↓
+Connect / Authenticate
+     ↓
+Institution Management
+     ↓
+View Registered Institutions
+     ├── Add New Institution
+     ├── Update Campus Location & Geofence
+     └── Delete Institution Boundary
+```
+
+#### Step-by-Step Screen Transitions:
+
+1. **Admin Portal Access (`/admin.html`)**
+   - **User Action:** Admin opens `/admin.html`, enters Backend URL and Admin Secret Key, clicks "Connect to Backend".
+   - **Result:** Secret verified; Institution Management cards become visible.
+   - **Next Screen:** Institution Command Center.
+
+2. **Managing Campus Centroids**
+   - **User Action:** Inputs Email Domain (e.g., `kccitm.edu.in`), Campus Name, Latitude, Longitude, and Radius (meters), then clicks "Save Institution".
+   - **Result:** Institution centroid saved to system table.
+   - **Next Screen:** Refreshed Registered Institutions table.
+
+---
+
+## 06 — Navigation Architecture
+
+```text
+                               PRIMARY NAVIGATION MODEL
+                                          │
+                  ┌───────────────────────┴───────────────────────┐
+                  │                                               │
+           FACULTY ROUTING                                 STUDENT ROUTING
+                  │                                               │
+    ┌─────────────┼─────────────┐                         ┌───────┴───────┐
+    │             │             │                         │               │
+Dashboard     Sessions      Templates                 Scan Link       Success Page
+( /dashboard ) ( /live )   ( /templates )            ( /scan )       ( Confirmation )
+    │             │             │                         │               │
+  [CTA]         [CTA]         [CTA]                     [CTA]           [CTA]
+Start Session  End Session  Save Preset               Submit Form     Close Browser
+```
+
+### Route Protection & Redirection Behavior:
+- **Protected Routes (`/dashboard`, `/live`, `/templates`):** Require active teacher login token. Unauthenticated users visiting these routes are immediately redirected to `/login`.
+- **Auth Guard (`/login`):** If an authenticated teacher visits `/login`, they are automatically redirected forward to `/dashboard`.
+- **Public Routes (`/`, `/scan`):** Accessible to anyone without login.
+
+---
+
+## 07 — Screen Inventory
+
+| Screen # | Screen Name | Route / Component | Primary User | Purpose | Entry Point | Exit / Next Point |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **1** | Landing Page | `/` (`HomePage.jsx`) | Public | Product overview, features & entry CTAs | Browser URL | Login / Signup or Scan |
+| **2** | Login / Signup | `/login` (`LoginSignup.jsx`) | Unauthenticated | Teacher login & Google SSO | Navbar "Login" | Teacher Dashboard |
+| **3** | Teacher Dashboard | `/dashboard` (`TeacherDashboard.jsx`)| Teacher | Control hub, active session & history | Login Success | Modal, Live QR, Templates |
+| **4** | Start Attendance Modal | Overlay (`TeacherDashboard.jsx`) | Teacher | Class setup, preset & GPS capture | "+ Start Attendance" | Live QR Control Room |
+| **5** | Live QR Control Room | `/live` (`LiveQRSession.jsx`) | Teacher | Dynamic QR projection & timer | Start Session | End Session Modal |
+| **6** | End Session Modal | Overlay (`LiveQRSession.jsx`) | Teacher | Confirm session closing | "End Attendance" | Session Summary View |
+| **7** | Session Summary View | `/live` (`LiveQRSession.jsx`) | Teacher | Final count & Excel download | Session Ended | Teacher Dashboard |
+| **8** | Template Builder | `/templates` (`TemplateBuilder.jsx`)| Teacher | Form builder & live preview | Nav "Templates" | Saved Presets Grid / Dashboard |
+| **9** | Student Attendance Form| `/scan` (`StudentAttendanceForm.jsx`)| Student | GPS grab & detail submission | QR Camera Scan | Success or Error Screen |
+| **10** | Student Success Screen | View (`StudentAttendanceForm.jsx`) | Student | Confirms attendance recording | Form Submission | Close Browser |
+| **11** | Student Error Screen | View (`StudentAttendanceForm.jsx`) | Student | Explains rejection reason | Failed Submission | Retry Location / Re-scan |
+| **12** | Institution Admin Portal| `/admin.html` (`admin.html`) | Admin | Campus centroid & domain setup | Direct Admin URL| Saved Institutions Table |
+
+---
+
+## 08 — Wireframes (Low-to-Mid Fidelity Layout Specifications)
+
+*Note: Wireframes focus strictly on **layout, structural hierarchy, and interaction points**. Styling details like exact color hexes, gradients, and drop shadows are excluded to prioritize UX clarity.*
+
+### Screen 1: Landing Page (`/`)
+```text
 +-----------------------------------------------------------------------------------+
-| [RQ] RollQR    Home   How it Works v   Features v   For Teachers   For Students   | [ Login ] [ Start Attendance -> ] |
+| [RQ] RollQR    Home   How it Works v   Features v   For Teachers   [ Login ] [ Start ]|
 +-----------------------------------------------------------------------------------+
 |                                                                                   |
-|  Eliminate Proxy Attendance.                 +-----------------------------------+  |
-|  Instant Classroom QR Roll Call.            | LIVE ATTENDANCE - KCCITM           |  |
-|                                             | CSE — 3rd Year         [ 42 Present]|  |
-|  Take attendance in 10 seconds with dynamic | +-------------------------------+ |  |
-|  rotating QR codes & GPS verification.      | | [#####  QR CODE RETICLE #####] | |  |
-|                                             | | [#####  SCAN TO MARK    #####] | |  |
-|  [ Start Attendance -> ] [ See Demo Video ] | +-------------------------------+ |  |
-|                                             | Progress: 42/62 [==============  ] |  |
-|  * Location Verified  * Zero App Download   +-----------------------------------+  |
+|  Eliminate Classroom Proxy Attendance.       +---------------------------------+  |
+|  Instant Dynamic QR Roll Call.               | LIVE SESSION: KCCITM            |  |
+|                                              | CSE 3rd Year        [42 Present]|  |
+|  Take attendance in 10 seconds with dynamic  | +-----------------------------+ |  |
+|  rotating QR codes & GPS verification.       | | [   DYNAMIC QR RETICLE    ] | |  |
+|                                              | | [   REFRESHES CONTINUOUSLY] | |  |
+|  [ Start Attendance -> ] [ Learn More ]      | +-----------------------------+ |  |
+|                                              | Session Progress: 42/62         |  |
+|  (v) GPS Verified  (v) Zero App Download     +---------------------------------+  |
 |                                                                                   |
 +-----------------------------------------------------------------------------------+
-|  BUILT FOR CLASSROOMS AT: [KCCITM]  ·  KCC Institute of Technology & Management   |
+|  BUILT FOR CLASSROOMS AT: [ KCCITM ]  ·  KCC Institute of Technology & Management |
 +-----------------------------------------------------------------------------------+
-|  FEATURES AT A GLANCE                                                             |
-|  +--------------------+  +--------------------+  +-----------------------------+  |
-|  | (QR) Dynamic QR    |  | (GPS) Geofencing   |  | (Excel) One-Click Export    |  |
-|  | Refreshes constantly|  | Classroom radius   |  | Clean .xlsx reports ready   |  |
-|  +--------------------+  +--------------------+  +-----------------------------+  |
-+-----------------------------------------------------------------------------------+
-```
-
-#### Mobile Layout (`HomePage.jsx`)
-```
-+-----------------------------+
-| [RQ] RollQR             [=] |
-+-----------------------------+
-| Live Classroom Attendance   |
-|                             |
-| Take attendance in seconds. |
-| No app download required.   |
-|                             |
-| [ Start Attendance -> ]     |
-| [ Login ]                   |
-|                             |
-| +-------------------------+ |
-| | LIVE SESSION: KCCITM    | |
-| | 42 Students Present     | |
-| | [ QR CODE PREVIEW ]     | |
-| +-------------------------+ |
-+-----------------------------+
 ```
 
 ---
 
-### Screen 2: Teacher Auth Portal (`/login` — `LoginSignup.jsx`)
-
-#### Desktop Split View
-```
+### Screen 2: Login / Signup (`/login`)
+```text
 +------------------------------------------+----------------------------------------+
 | [RQ] RollQR                              | Teacher Login                          |
-|                                          | Welcome back. Enter your credentials.  |
+|                                          | Enter your credentials to continue.    |
 | Welcome back.                            |                                        |
 | Your attendance dashboard is a scan away.| [ G  Sign in with Google             ] |
 |                                          | ----------------- OR ----------------- |
 | +--------------------------------------+ |                                        |
-| | LIVE SESSION: KCCITM CSE 3rd Year   | | USERNAME *                             |
-| | 42 Present                            | | [ prof_sharma                      ] |
-| | [ QR Code Visual ]                   | |                                        |
+| | LIVE SESSION PREVIEW                 | | USERNAME *                             |
+| | KCCITM · CSE 3rd Year   [42 Present] | | [ prof_sharma                      ] |
+| | [ Mini Dynamic QR ]                  | |                                        |
 | +--------------------------------------+ | PASSWORD *                             |
 |                                          | [ **********                   (o) ] |
 | * Generate QR in 1 click                 |                                        |
@@ -161,19 +366,16 @@ flowchart TD
 
 ---
 
-### Screen 3: Teacher Command Dashboard (`/dashboard` — `TeacherDashboard.jsx`)
-
-#### Dashboard Layout with Active Session & History
-```
+### Screen 3: Teacher Dashboard (`/dashboard`)
+```text
 +-----------------------------------------------------------------------------------+
-| [RQ] RollQR    Dashboard   Sessions (Live)   Templates          [ Prof. Sharma (S)]|
+| [RQ] RollQR    Dashboard   Sessions   Templates                 [ Prof. Sharma (S)]|
 +-----------------------------------------------------------------------------------+
 |                                                                                   |
 |  FACULTY OPERATIONAL COMMAND                                                      |
 |  Good morning, Prof. Sharma 👋                                                    |
-|  Manage classroom attendance in seconds. Select a template or start an instant QR. |
-|                                                    [ + Start Attendance ]         |
-+-----------------------------------------------------------------------------------+
+|  Manage classroom attendance in seconds.            [ + Start Attendance ]         |
+|                                                                                   |
 |  ACTIVE ATTENDANCE SESSION                                                        |
 |  +------------------------------------------------------------------------------+  |
 |  | (• LIVE ATTENDANCE)  Session #104                                            |  |
@@ -181,28 +383,25 @@ flowchart TD
 |  | Geofence Radius: 30m  •  Preset: CSE Standard Roster                          |  |
 |  |                                      [ End Attendance ]  [ Open Live QR -> ] |  |
 |  +------------------------------------------------------------------------------+  |
-+-----------------------------------------------------------------------------------+
+|                                                                                   |
 |  QUICK ACTIONS                                                                    |
 |  +-----------------------+  +-----------------------+  +-----------------------+  |
 |  | (Play)                |  | (Plus)                |  | (History)             |  |
 |  | Start Attendance      |  | Create Template       |  | View History          |  |
-|  | Rolling QR + Geofence |  | Custom form presets   |  | Export past sessions  |  |
 |  +-----------------------+  +-----------------------+  +-----------------------+  |
-+-----------------------------------------------------------------------------------+
-|  RECENT ATTENDANCE ACTIVITY                                   [ Search sessions ]  |
+|                                                                                   |
+|  RECENT ATTENDANCE ACTIVITY                                   [ Filter sessions ] |
 |  +------------------------------------------------------------------------------+  |
-|  | (Table) CS301 Data Structures  •  Session #104  [LIVE]    [ Download Excel ] |  |
-|  | (Table) CS302 Database System   •  Session #101  [ENDED]   [ Download Excel ] |  |
-|  | (Table) CS305 Computer Networks •  Session #98   [ENDED]   [ Download Excel ] |  |
+|  | CS301 Data Structures  •  Session #104  [LIVE]        [ Download Excel ]     |  |
+|  | CS302 Database Systems •  Session #101  [ENDED]       [ Download Excel ]     |  |
 |  +------------------------------------------------------------------------------+  |
 +-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-### Screen 4: Start Attendance Setup Modal
-
-```
+### Screen 4: Start Attendance Modal
+```text
 +-------------------------------------------------------------------------+
 | (QR) Start Attendance                                              [X]  |
 | Set up your class and generate a QR code.                               |
@@ -226,10 +425,8 @@ flowchart TD
 
 ---
 
-### Screen 5: Live QR Control Room (`/live` — `LiveQRSession.jsx`)
-
-#### Control Room Dark-Mode UI
-```
+### Screen 5: Live QR Control Room (`/live`)
+```text
 +-----------------------------------------------------------------------------------+
 | [RQ] RollQR   (• LIVE ATTENDANCE CONTROL)            [ Download Excel ] [ Dashboard ]|
 +-----------------------------------------------------------------------------------+
@@ -246,12 +443,12 @@ flowchart TD
 |                 |  |                                 |  |                         |
 |                 |  +---------------------------------+  |                         |
 |                 |  Scan to mark attendance              |                         |
-|                 |  (~) QR refreshes in 14s              |                         |
+|                 |  (~) QR refreshes in 18s              |                         |
 |                 +---------------------------------------+                         |
 |                                                                                   |
 |  +----------------------+  +----------------------+  +-------------------------+  |
 |  | 1. SCAN              |  | 2. VERIFY            |  | 3. RECORDED             |  |
-|  | Student scans QR     |  | GPS & Token checked  |  | Added to class roster   |  |
+|  | Student scans QR     |  | GPS & Token checked  |  | Added to roster         |  |
 |  +----------------------+  +----------------------+  +-------------------------+  |
 |                                                                                   |
 |                 [ End Attendance ]    [ Download Excel ]                          |
@@ -260,31 +457,19 @@ flowchart TD
 
 ---
 
-### Screen 6: End Session Confirmation Modal
-
-```
+### Screen 6: End Session Confirmation Modal & Summary View
+```text
+MODAL CONFIRMATION:
 +-------------------------------------------------------------------------+
 | (!) End Attendance Session?                                             |
 | Students will no longer be able to scan or submit.                      |
-+-------------------------------------------------------------------------+
-|                                                                         |
 | Class: CS301 Data Structures & Algorithms                               |
-| Status: Active Rolling QR                                               |
-|                                                                         |
 +-------------------------------------------------------------------------+
 |                                          [ Cancel ]  [ End Attendance Now ]
 +-------------------------------------------------------------------------+
-```
 
----
-
-### Screen 7: Attendance Completed State (`LiveQRSession.jsx`)
-
-```
+COMPLETED SUMMARY VIEW:
 +-----------------------------------------------------------------------------------+
-| [RQ] RollQR   (Session Ended)                        [ Download Excel ] [ Dashboard ]|
-+-----------------------------------------------------------------------------------+
-|                                                                                   |
 |                         +-------------------------------+                         |
 |                         |              [✓]              |                         |
 |                         |     Attendance Completed      |                         |
@@ -296,20 +481,16 @@ flowchart TD
 |                         | [ Download Excel Report ]     |                         |
 |                         | [ Back to Dashboard ]         |                         |
 |                         +-------------------------------+                         |
-|                                                                                   |
 +-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-### Screen 8: Template Builder (`/templates` — `TemplateBuilder.jsx`)
-
-#### Builder View with Live Interactive Mobile Preview
-```
+### Screen 7: Template Builder (`/templates`)
+```text
 +-----------------------------------------------------------------------------------+
 | [RQ] RollQR    Dashboard   Sessions   Templates           [ <-- Back to Dashboard ]|
 +-----------------------------------------------------------------------------------+
-|                                                                                   |
 | Attendance Templates                                      [ + Create Template ]   |
 | Create reusable forms for your classes.                                           |
 +-----------------------------------------------------------------------------------+
@@ -329,25 +510,15 @@ flowchart TD
 | | | [x] Required  [ ] Unique Roll Number      | | | |                           | | |
 | | +-------------------------------------------+ | | | [ Mark Attendance ]     | | |
 | |                                               | | +-------------------------+ | |
-| | [ Cancel ]           [ Save Template ]        | | Interactive Student View    | |
+| | [ Cancel ]           [ Save Template ]        | | Interactive Mobile Preview  | |
 | +-----------------------------------------------+ +-----------------------------+ |
-+-----------------------------------------------------------------------------------+
-| SAVED TEMPLATES                                                                   |
-| +--------------------------+  +--------------------------+                        |
-| | (Doc) CS301 Daily Preset |  | (Doc) AI/ML Lab Template |                        |
-| | 2 fields configured      |  | 3 fields configured      |                        |
-| | [Roll Number*] [Name*]   |  | [Roll Number*] [Batch]   |                        |
-| | [ Use Template -> ]      |  | [ Use Template -> ]      |                        |
-| +--------------------------+  +--------------------------+                        |
 +-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-### Screen 9: Student Attendance Form (`/scan` — `StudentAttendanceForm.jsx`)
-
-#### Mobile Scan Screen
-```
+### Screen 8: Student Attendance Form (`/scan`) — Mobile Optimized
+```text
 +-----------------------------+
 | [RQ] RollQR  [Student Scan] |
 +-----------------------------+
@@ -375,28 +546,28 @@ flowchart TD
 
 ---
 
-### Screen 10: Student Success Confirmation Screen
+### Screen 9: Student Success & Error Screens — Mobile View
 
-```
-+-----------------------------+
-|                             |
-|            [ ✓ ]            |
-|     Attendance Marked!      |
-|  Recorded successfully.     |
-|                             |
-|  CONFIRMATION DETAILS       |
-|  Status: PRESENT            |
-|  Record ID: #1842           |
-|                             |
-| Powered by RollQR           |
+```text
+SUCCESS CONFIRMATION:           FAILURE / ERROR ALERT:
++-----------------------------+ +-----------------------------+
+|                             | | [RQ] RollQR  [Student Scan] |
+|            [ ✓ ]            | +-----------------------------+
+|     Attendance Marked!      | | (!) ERROR SUBMITTING        |
+|  Recorded successfully.     | | You are outside the allowed |
+|                             | | classroom GPS boundary.     |
+|  CONFIRMATION DETAILS       | |                             |
+|  Status: PRESENT            | | [ Retry GPS Location ]      |
+|  Record ID: #1842           | |                             |
+|                             | | Powered by RollQR           |
+| Powered by RollQR           | +-----------------------------+
 +-----------------------------+
 ```
 
 ---
 
-### Screen 11: Institution Admin Portal (`admin.html`)
-
-```
+### Screen 10: Institution Admin Portal (`/admin.html`)
+```text
 +-----------------------------------------------------------------------------------+
 | [RQ] RollQR                                                  [ Admin Portal ]     |
 +-----------------------------------------------------------------------------------+
@@ -428,9 +599,39 @@ flowchart TD
 
 ---
 
-## 3. Detailed Step-by-Step User Flows
+## 09 — Responsive Behavior
 
-### Flow 1: Teacher Authentication & Google OAuth
+### Desktop Layout Strategy (Teachers & Administrators)
+- **Multi-Column Dashboard:** Left hero operational banner, right quick actions, wide recent history data table.
+- **Side-by-Side Builder:** Template Builder presents the Form Editor on the left 7 columns and the Live Interactive Student Form Preview on the right 5 columns.
+- **Large QR Display:** Live QR Control Room renders a 230px+ QR SVG suitable for classroom projection screens.
+
+### Mobile Layout Strategy (Students)
+- **Single Column Stack:** All fields, banners, and buttons stack vertically with `max-w-md` centering.
+- **Touch Targets:** Large minimum button heights (48px+) for "Allow & Grab My Location" and "Mark Attendance".
+- **Distraction-Free:** Unnecessary header links and footers removed to keep student scan focused on 3 taps: Scan -> GPS -> Submit.
+
+---
+
+## 10 — Interaction States
+
+Every primary interactive screen supports six core states:
+
+1. **Default State:** Normal operational view ready for user interaction.
+2. **Loading State:** Displayed during API fetches or GPS retrieval (e.g., `"Fetching Location..."` spinner on button).
+3. **Active State:** Session currently running (`LIVE` pulse indicator on Dashboard & Live QR page).
+4. **Success State:** Feedback modal or banner shown upon successful submission/save (`"Attendance Marked!"` receipt).
+5. **Error State:** Warning notification when validation fails (`"Location outside allowed radius"` red banner).
+6. **Disabled State:** Action button unclickable until prerequisites met (e.g., "Start Session" button disabled until GPS location is captured).
+
+---
+
+## 11 — Technical / System Flows (Architecture Layer)
+
+*Note: This section contains technical sequence diagrams detailing backend API endpoints, database interactions, JWT tokens, and background logic. Keep these separate from the non-technical User Flows in Section 05.*
+
+### 11.1 Authentication & Google OAuth Sequence
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -438,22 +639,22 @@ sequenceDiagram
     participant FE as React Frontend (LoginSignup.jsx)
     participant GIS as Google Identity SDK
     participant BE as FastAPI Backend (auth.py)
-    participant DB as SQLite / PostgreSQL DB
+    participant DB as Database
 
     Teacher->>FE: Navigate to /login
     alt Standard Login
         Teacher->>FE: Input Username & Password -> Click "Login"
         FE->>BE: POST /login {username, password}
-        BE->>DB: Query User record & verify bcrypt hash
-        DB-->>BE: User valid
+        BE->>DB: Query User & verify password hash
+        DB-->>BE: User record valid
         BE-->>FE: Return {access_token, token_type: "bearer"}
     else Google OAuth Sign-In
         FE->>GIS: Render Google Sign-In Button
-        Teacher->>GIS: Click Google Sign-In & Select Google Account
-        GIS-->>FE: Return Google ID Token (credential)
+        Teacher->>GIS: Click & Select Google Account
+        GIS-->>FE: Return Google ID Token credential
         FE->>BE: POST /auth/google {id_token}
-        BE->>BE: Verify token with Google API / token info
-        BE->>DB: Get or auto-create User record
+        BE->>BE: Verify token with Google API
+        BE->>DB: Query or auto-register User record
         BE-->>FE: Return {access_token, token_type: "bearer"}
     end
     FE->>FE: Store token in localStorage ('teacher_token')
@@ -462,113 +663,71 @@ sequenceDiagram
 
 ---
 
-### Flow 2: Custom Template Creation & Management
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Teacher
-    participant FE as TemplateBuilder.jsx
-    participant BE as template.py
-    participant DB as Database
+### 11.2 Start Session & Dynamic QR Generation Sequence
 
-    Teacher->>FE: Click "Templates" in nav -> Navigate to /templates
-    Teacher->>FE: Click "+ Create Template"
-    Teacher->>FE: Input Template Name (e.g. "CS301 Daily")
-    Teacher->>FE: Add / Customize Fields (Label, Type, Required, Unique Roll No)
-    FE->>FE: Update Live Student Form Preview in real-time
-    Teacher->>FE: Click "Save Template"
-    FE->>BE: POST /templates (Bearer Token, Header)
-    BE->>DB: Insert Template & TemplateField records
-    DB-->>BE: Saved
-    BE-->>FE: Return Template JSON
-    FE->>FE: Refresh Template List Grid
-```
-
----
-
-### Flow 3: Live Session Initiation & GPS Geofence Setup
 ```mermaid
 sequenceDiagram
     autonumber
     actor Teacher
     participant FE as TeacherDashboard.jsx
-    participant GPS as Phone Browser Geolocation
+    participant GPS as Browser Geolocation API
     participant BE as session.py
     participant DB as Database
 
     Teacher->>FE: Click "+ Start Attendance"
-    FE->>FE: Open Start Attendance Modal
-    Teacher->>FE: Input Class/Subject ID (e.g., "CS301")
-    Teacher->>FE: Select Template Preset & Radius (e.g., 30 meters)
+    Teacher->>FE: Input class_id, template_id, radius_meters
     Teacher->>FE: Click "📍 Capture GPS Center Location"
     FE->>GPS: navigator.geolocation.getCurrentPosition()
-    GPS-->>FE: Return {lat: 28.6139, long: 77.2090}
+    GPS-->>FE: Return {lat, long}
     Teacher->>FE: Click "Start Session & Open Live QR"
-    FE->>BE: POST /session/start {class_id, center_lat, center_long, radius_meters, template_id}
-    BE->>DB: Create Session record (is_active = True)
+    FE->>BE: POST /session/start (Bearer Token, JSON Payload)
+    BE->>DB: Insert Session record (is_active = True)
     BE->>BE: Generate initial 18-second rolling QR Token
     BE-->>FE: Return Session & initial Token object
-    FE->>FE: Set activeSession state -> Navigate to /live
+    FE->>FE: Navigate to /live
 ```
 
 ---
 
-### Flow 4: Student QR Scanning & Attendance Submission
+### 11.3 Student Attendance Verification & Submission Sequence
+
 ```mermaid
 sequenceDiagram
     autonumber
     actor Student
-    participant Cam as Mobile Camera
     participant FE as StudentAttendanceForm.jsx
-    participant GPS as Student GPS
+    participant GPS as Phone Geolocation
     participant BE as attendance.py
     participant DB as Database
 
-    Student->>Cam: Scan Live QR Code on Classroom Display
-    Cam->>FE: Open URL: /?session_id=104&qr_token=xyz123
+    Student->>FE: Open URL: /?session_id=104&qr_token=xyz123
     FE->>BE: GET /session/104/public-form
-    BE-->>FE: Return form fields, class_id, is_active status
-    Student->>FE: Click "📍 Allow & Grab My Location"
+    BE-->>FE: Return template form_fields, class_id, is_active
+    Student->>FE: Tap "📍 Allow & Grab My Location"
     FE->>GPS: navigator.geolocation.getCurrentPosition()
     GPS-->>FE: Return student {lat, long}
-    Student->>FE: Fill required fields (Roll Number, Full Name, Section)
-    Student->>FE: Click "Mark Attendance"
+    Student->>FE: Fill form fields & tap "Mark Attendance"
     FE->>BE: POST /attendance/submit {session_id, qr_token, lat, long, device_id, responses}
     
-    BE->>BE: 1. Verify session is active
-    BE->>BE: 2. Verify qr_token is valid & not expired
-    BE->>BE: 3. Verify student GPS is within session radius_meters
+    BE->>BE: 1. Check session is_active == True
+    BE->>BE: 2. Validate qr_token signature & expiration
+    BE->>BE: 3. Haversine GPS formula check vs campus radius
     BE->>BE: 4. Check for duplicate roll number in session
     
-    alt Verification Successful
+    alt All Checks Pass
         BE->>DB: Insert AttendanceLog record
         BE-->>FE: Return {status: "PRESENT", record_id: 1842}
         FE->>FE: Render Attendance Marked Success Screen
-    else Verification Failed (e.g. Out of Range / Expired QR)
-        BE-->>FE: 400 Bad Request {detail: "You are outside classroom boundary"}
-        FE->>FE: Render Red Error Notification Banner
+    else Validation Failure (Out of range / Expired token)
+        BE-->>FE: 400 Bad Request {detail: "Error message"}
+        FE->>FE: Render Error Notification Banner
     end
 ```
 
 ---
 
-### Flow 5: Real-time QR Refresh & Session Monitoring
-```mermaid
-sequenceDiagram
-    autonumber
-    participant FE as LiveQRSession.jsx
-    participant BE as session.py
+### 11.4 Excel Export Sequence
 
-    loop Every 2 Seconds Polling
-        FE->>BE: GET /session/{session_id}/current-token (Bearer Token)
-        BE-->>FE: Return {qr_token: "new_hash", expires_in_seconds: 18}
-        FE->>FE: Update QRCodeSVG value & countdown timer
-    end
-```
-
----
-
-### Flow 6: Session Termination & Automated Excel Export
 ```mermaid
 sequenceDiagram
     autonumber
@@ -576,85 +735,46 @@ sequenceDiagram
     participant FE as LiveQRSession.jsx
     participant BE as session.py / excel_export.py
 
-    Teacher->>FE: Click "End Attendance"
-    FE->>FE: Show End Session Confirmation Modal
-    Teacher->>FE: Click "End Attendance Now"
-    FE->>BE: POST /session/{session_id}/end
-    BE->>BE: Set session.is_active = False & invalidate tokens
-    BE-->>FE: Return 200 OK
-    FE->>FE: Render Attendance Completed Screen
-    Teacher->>FE: Click "Download Excel Report"
-    FE->>BE: GET /session/{session_id}/export-excel
-    BE->>BE: Generate openpyxl Spreadsheet (.xlsx)
-    BE-->>FE: Binary Blob Stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
-    FE->>FE: Trigger automated browser download: Attendance_CS301_104.xlsx
+    Teacher->>FE: Click "Download Excel"
+    FE->>BE: GET /session/{session_id}/export-excel (Bearer Token)
+    BE->>BE: Fetch attendance records & build openpyxl Workbook (.xlsx)
+    BE-->>FE: Binary File Blob (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
+    FE->>FE: Trigger automated browser file download
 ```
 
 ---
 
-## 4. Navigation Mapping & State Management
+## 12 — Existing vs Recommended Features
 
-### 4.1 State Persistence Architecture
+To ensure complete clarity for engineering and product teams, features are strictly classified below:
 
-```mermaid
-graph LR
-    subgraph Browser Storage
-        LS1[localStorage.teacher_token] -->|JWT Auth Header| API[FastAPI Backend]
-        LS2[localStorage.student_device_id] -->|Hardware Fingerprint| API
-        LS3[localStorage.admin_secret] -->|X-Admin-Secret| AdminAPI[Admin Endpoints]
-    end
+### EXISTING (Currently Implemented in Codebase)
+- **Teacher Authentication:** Username/password signup and login, Google Identity Services OAuth 2.0 integration, JWT token issuance.
+- **Dynamic Rolling QR Code:** Backend token generation refreshing every 18–20 seconds to prevent QR screenshot sharing.
+- **GPS Campus Geofencing:** Haversine formula calculation enforcing distance boundaries between student GPS and teacher/campus center.
+- **Template Form Builder:** Custom attendance presets with text, number, dropdown, and unique roll number fields.
+- **Excel Roster Export:** Automated `.xlsx` file download for ended sessions via `openpyxl`.
+- **Institution Administration:** `/admin.html` portal for setting college domain centroids and geofence radii.
 
-    subgraph App State App.jsx
-        S1[activeSession]
-        S2[currentToken]
-        S3[templates]
-        S4[pastSessions]
-        S5[studentForm]
-    end
-
-    S1 -->|Polled every 2s| S2
-    S1 -->|Triggers route| LiveRoute[/live]
-    S3 -->|Populates presets| DashRoute[/dashboard]
-```
+### RECOMMENDED (Future Sprints / UX Enhancements)
+- **Real-Time Live Counter via WebSockets / SSE:** Push student scan updates live to the projection screen without polling.
+- **Progressive Web App (PWA) Offline Support:** Offline caching of student forms for poor connectivity classrooms.
+- **Haptic Vibration & Audio Feedback:** Mobile vibration on successful scan confirmation.
+- **Multi-Teacher Departmental Template Sharing:** Shared presets across faculty members under the same college domain.
 
 ---
 
-### 4.2 State Table Reference
+## 13 — UX Recommendations
 
-| State Variable | Component Location | Initial Value | Trigger / Source |
-| :--- | :--- | :--- | :--- |
-| `token` | `App.jsx` | `localStorage.getItem('teacher_token')` | Auth API login / signup |
-| `activeSession` | `App.jsx` | `null` | POST `/session/start` |
-| `currentToken` | `App.jsx` | `''` | GET `/session/{id}/current-token` (2s poll) |
-| `expiresIn` | `App.jsx` | `0` | GET `/session/{id}/current-token` |
-| `templates` | `App.jsx` | `[]` | GET `/templates` |
-| `pastSessions` | `App.jsx` | `[]` | GET `/session/my-sessions` |
-| `studentForm` | `App.jsx` | `null` | GET `/session/{id}/public-form` |
-| `studentLoc` | `App.jsx` | `null` | `navigator.geolocation.getCurrentPosition` |
+1. **Visibility of QR Timer:** Display an animated radial progress ring around the countdown seconds on `/live` so teachers and students visually anticipate token rotation.
+2. **Clear GPS Guidance:** If student location capture fails or accuracy is poor (>50m), provide a step-by-step tooltip advising students to enable high-accuracy location mode or step near windows.
+3. **One-Tap Re-Scan:** On QR expiration errors, include a single "Scan Next QR" button that opens the device camera directly within the web application.
 
 ---
 
-## 5. Recommended UX Improvements & Developer Implementation Guide
+## 14 — Developer Handoff Notes
 
-### 5.1 Key UX Recommendations for Future Sprints
-
-1. **Live Roster Counter WebSocket / SSE:**
-   - *Current State:* Roster count updates when reopening dashboard or ending session.
-   - *Recommendation:* Add Server-Sent Events (SSE) or WebSockets on `/live` so teachers see student attendance counts tick up live in real-time as students scan.
-
-2. **Offline-Capable Progressive Web App (PWA):**
-   - *Recommendation:* Add a Web App Manifest and Service Worker so student scanner forms open seamlessly even in weak classroom cellular signals.
-
-3. **Audio / Visual Haptic Feedback on Student Scan:**
-   - *Recommendation:* Trigger a subtle tactile vibration (`navigator.vibrate([100, 50, 100])`) and success chime when student attendance is confirmed.
-
-4. **Multi-Teacher Departmental Sharing:**
-   - *Recommendation:* Allow templates created by department heads to be shared across all faculty members within the same college domain (`@kccitm.edu.in`).
-
----
-
-### 5.2 Developer Implementation Rules
-
-- **Strict Token Verification:** All endpoints under `/session/start`, `/session/end`, `/session/my-sessions`, and `/templates` MUST require valid Bearer JWT tokens.
-- **Geofence Fallback:** If GPS accuracy is low (> 50m accuracy rating), notify student to move closer to the instructor standard centroid.
-- **Schema Mapping:** Always map ORM session models explicitly to Pydantic schemas (`SessionResponse`) to prevent `ResponseValidationError`.
+- **Authentication Headers:** All endpoints except `/session/{id}/public-form` and `/attendance/submit` require the `Authorization: Bearer <jwt_token>` header.
+- **Schema Validation:** In `backend/app/routes/session.py`, ensure all database ORM session models are mapped to `SessionResponse` Pydantic schemas to avoid serialization errors.
+- **Device Fingerprinting:** `getDeviceId()` in `App.jsx` stores a persistent unique device ID in `localStorage.getItem('student_device_id')` to assist in anti-proxy verification.
+- **Admin Secret Header:** Admin requests from `admin.html` require `X-Admin-Secret` header matching the server's `ADMIN_SECRET` environment variable.
