@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 
-// API Base URL from Environment Variable (Vite) with local fallback for laptop development
+import HomePage from './components/HomePage';
+import LoginSignup from './components/LoginSignup';
+import TeacherDashboard from './components/TeacherDashboard';
+import LiveQRSession from './components/LiveQRSession';
+import TemplateBuilder from './components/TemplateBuilder';
+import StudentAttendanceForm from './components/StudentAttendanceForm';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
-export default function App() {
-  // Check if URL has student scan query params (?session_id=1&qr_token=xyz)
-  const queryParams = new URLSearchParams(window.location.search);
-  const scanSessionId = queryParams.get('session_id');
-  const scanQrToken = queryParams.get('qr_token');
+function MainApp() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  const scanSessionId = searchParams.get('session_id');
+  const scanQrToken = searchParams.get('qr_token');
 
   // --- STUDENT SCANNER STATE ---
   const [studentForm, setStudentForm] = useState(null);
@@ -22,17 +30,12 @@ export default function App() {
 
   // --- TEACHER PORTAL STATE ---
   const [token, setToken] = useState(localStorage.getItem('teacher_token') || '');
-  const [isSignup, setIsSignup] = useState(false);
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
 
-  const [activeTab, setActiveTab] = useState('session');
-  const [location, setLocation] = useState(null);
-  const [locLoading, setLocLoading] = useState(false);
-  const [classId, setClassId] = useState('CS101');
+  const [teacherLoc, setTeacherLoc] = useState(null);
+  const [teacherLocLoading, setTeacherLocLoading] = useState(false);
+  const [classId, setClassId] = useState('CS301');
   const [radiusMeters, setRadiusMeters] = useState(30);
 
   const [templates, setTemplates] = useState([]);
@@ -49,6 +52,8 @@ export default function App() {
   const [currentToken, setCurrentToken] = useState('');
   const [expiresIn, setExpiresIn] = useState(0);
 
+  const googleSigninButtonRef = useRef(null);
+
   const getDeviceId = () => {
     let devId = localStorage.getItem('student_device_id');
     if (!devId) {
@@ -58,12 +63,14 @@ export default function App() {
     return devId;
   };
 
+  // 1. Fetch public form if URL contains session_id
   useEffect(() => {
     if (scanSessionId) {
       fetchPublicForm(scanSessionId);
     }
   }, [scanSessionId]);
 
+  // 2. Fetch teacher data on token update
   useEffect(() => {
     if (token && !scanSessionId) {
       fetchTemplates();
@@ -71,6 +78,7 @@ export default function App() {
     }
   }, [token, scanSessionId]);
 
+  // 3. Poll active session token
   useEffect(() => {
     let interval = null;
     if (activeSession && activeSession.session_id) {
@@ -84,7 +92,7 @@ export default function App() {
     };
   }, [activeSession]);
 
-  // --- STUDENT HANDLERS ---
+  // --- API HANDLERS: STUDENT ---
 
   const fetchPublicForm = async (sessId) => {
     try {
@@ -166,10 +174,9 @@ export default function App() {
     }
   };
 
-  // --- TEACHER HANDLERS ---
+  // --- API HANDLERS: TEACHER AUTH ---
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async ({ username, password }) => {
     setAuthError('');
     setAuthSuccess('');
     try {
@@ -184,13 +191,13 @@ export default function App() {
       }
       setToken(data.access_token);
       localStorage.setItem('teacher_token', data.access_token);
+      navigate('/dashboard');
     } catch (err) {
       setAuthError(err.message);
     }
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
+  const handleSignup = async ({ username, email, password }) => {
     setAuthError('');
     setAuthSuccess('');
     try {
@@ -203,9 +210,7 @@ export default function App() {
       if (!res.ok) {
         throw new Error(data.detail || 'Signup failed');
       }
-      setAuthSuccess('Teacher account created successfully! Please sign in.');
-      setIsSignup(false);
-      setPassword('');
+      setAuthSuccess('Teacher account created successfully! Please log in.');
     } catch (err) {
       setAuthError(err.message);
     }
@@ -215,6 +220,7 @@ export default function App() {
     setToken('');
     localStorage.removeItem('teacher_token');
     setActiveSession(null);
+    navigate('/');
   };
 
   const handleGoogleCredentialResponse = async (response) => {
@@ -232,14 +238,14 @@ export default function App() {
       }
       setToken(data.access_token);
       localStorage.setItem('teacher_token', data.access_token);
+      navigate('/dashboard');
     } catch (err) {
       setAuthError(err.message);
     }
   };
 
-  // Render the Google Sign-In button whenever the login/signup screen is showing
   useEffect(() => {
-    if (!token && !scanSessionId && GOOGLE_CLIENT_ID && window.google) {
+    if (!token && GOOGLE_CLIENT_ID && window.google && location.pathname === '/login') {
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCredentialResponse
@@ -254,7 +260,9 @@ export default function App() {
         });
       }
     }
-  }, [token, scanSessionId, isSignup]);
+  }, [token, location.pathname]);
+
+  // --- API HANDLERS: TEACHER DASHBOARD & SESSIONS ---
 
   const fetchTemplates = async () => {
     try {
@@ -296,7 +304,7 @@ export default function App() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Attendance_${className}_Session_${sessionId}.xlsx`;
+        a.download = `Attendance_${className || 'Session'}_${sessionId}.xlsx`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -372,7 +380,7 @@ export default function App() {
           { label: 'Student Name', type: 'text', required: true, is_unique_id: false, options: '' }
         ]);
         fetchTemplates();
-        setActiveTab('session');
+        navigate('/dashboard');
       } else {
         const data = await res.json();
         alert(data.detail || 'Failed to save template');
@@ -383,41 +391,41 @@ export default function App() {
   };
 
   const getGPSLocation = () => {
-    setLocLoading(true);
+    setTeacherLocLoading(true);
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by browser.');
-      setLocLoading(false);
+      setTeacherLocLoading(false);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLocation({
+        setTeacherLoc({
           lat: pos.coords.latitude,
           long: pos.coords.longitude
         });
-        setLocLoading(false);
+        setTeacherLocLoading(false);
       },
       () => {
         alert('Could not grab location. Using default testing coordinates.');
-        setLocation({ lat: 28.6139, long: 77.2090 });
-        setLocLoading(false);
+        setTeacherLoc({ lat: 28.6139, long: 77.2090 });
+        setTeacherLocLoading(false);
       },
       { enableHighAccuracy: true }
     );
   };
 
   const handleStartSession = async (e) => {
-    e.preventDefault();
-    if (!location) {
-      alert('Please click "📍 Grab Current GPS Location" first!');
+    if (e) e.preventDefault();
+    if (!teacherLoc) {
+      alert('Please click "📍 Capture GPS Center" first!');
       return;
     }
 
     try {
       const payload = {
         class_id: classId,
-        center_lat: location.lat,
-        center_long: location.long,
+        center_lat: teacherLoc.lat,
+        center_long: teacherLoc.long,
         radius_meters: parseFloat(radiusMeters)
       };
 
@@ -441,6 +449,7 @@ export default function App() {
 
       setActiveSession(data);
       fetchPastSessions();
+      navigate('/live');
     } catch (err) {
       alert(err.message);
     }
@@ -448,7 +457,6 @@ export default function App() {
 
   const handleEndSession = async () => {
     if (!activeSession) return;
-    if (!window.confirm('End this attendance session?')) return;
 
     try {
       const res = await fetch(`${API_BASE_URL}/session/${activeSession.session_id}/end`, {
@@ -456,7 +464,6 @@ export default function App() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
-        alert('Attendance session ended successfully!');
         const currentId = activeSession.session_id;
         const currentClass = activeSession.class_id;
         setActiveSession(null);
@@ -464,6 +471,7 @@ export default function App() {
         if (window.confirm('Would you like to download the Excel sheet for this ended session now?')) {
           downloadExcel(currentId, currentClass);
         }
+        navigate('/dashboard');
       }
     } catch (err) {
       alert(err.message);
@@ -485,545 +493,150 @@ export default function App() {
     }
   };
 
-  // --- VIEWS ---
-
-  // VIEW A: PUBLIC STUDENT SCANNING VIEW
+  // If scanSessionId is present in URL, force Student Attendance view
   if (scanSessionId) {
-    if (studentResult) {
-      return (
-        <div className="container" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 60, marginBottom: 10 }}>🎉</div>
-          <h1 className="title" style={{ color: '#4ade80' }}>Attendance Marked!</h1>
-          <p className="subtitle">Your attendance has been recorded successfully.</p>
-          <div style={{ background: '#0f172a', padding: 20, borderRadius: 12, border: '1px solid #334155', marginTop: 20 }}>
-            <div>Status: <strong style={{ color: '#4ade80' }}>{studentResult.status}</strong></div>
-            <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>Record ID: #{studentResult.record_id}</div>
-          </div>
-        </div>
-      );
-    }
-
     return (
-      <div className="container">
-        <h1 className="title">Student Attendance Form</h1>
-        <p className="subtitle">Scan verified • Session #{scanSessionId}</p>
-
-        {studentError && <div className="alert-error">{studentError}</div>}
-
-        {!studentForm ? (
-          <div style={{ textAlign: 'center', padding: 30, color: '#94a3b8' }}>
-            Loading attendance form...
-          </div>
-        ) : !studentForm.is_active ? (
-          <div className="alert-error" style={{ textAlign: 'center' }}>
-            🔴 This attendance session has ended. Submissions are closed.
-          </div>
-        ) : (
-          <form onSubmit={handleStudentSubmit}>
-            <div className="gps-box">
-              <button
-                type="button"
-                onClick={getStudentGPS}
-                className="btn"
-                style={{ background: studentLoc ? '#16a34a' : '#0284c7', padding: '12px', fontSize: 14 }}
-              >
-                {studentLocLoading
-                  ? 'Fetching Phone Location...'
-                  : studentLoc
-                  ? '✅ GPS Location Verified'
-                  : '📍 Allow & Grab My GPS Location'}
-              </button>
-              {studentLoc && (
-                <div className="gps-coords">
-                  Location Captured (Lat: {studentLoc.lat.toFixed(4)}, Long: {studentLoc.long.toFixed(4)})
-                </div>
-              )}
-            </div>
-
-            {studentForm.form_fields.map((field, idx) => (
-              <div key={idx} className="form-group">
-                <label>
-                  {field.label} {field.required ? '*' : ''} {field.is_unique_id ? '(Unique Roll No)' : ''}
-                </label>
-                {field.type === 'dropdown' ? (
-                  <select
-                    required={field.required}
-                    value={studentResponses[field.label] || ''}
-                    onChange={(e) => setStudentResponses({ ...studentResponses, [field.label]: e.target.value })}
-                  >
-                    <option value="">-- Select {field.label} --</option>
-                    {(field.options || []).map((opt, oIdx) => (
-                      <option key={oIdx} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type={field.type === 'number' ? 'number' : 'text'}
-                    required={field.required}
-                    placeholder={`Enter ${field.label}`}
-                    value={studentResponses[field.label] || ''}
-                    onChange={(e) => setStudentResponses({ ...studentResponses, [field.label]: e.target.value })}
-                  />
-                )}
-              </div>
-            ))}
-
-            <button type="submit" className="btn" disabled={studentSubmitting}>
-              {studentSubmitting ? 'Submitting...' : '🚀 Submit Attendance'}
-            </button>
-          </form>
-        )}
-      </div>
+      <StudentAttendanceForm
+        scanSessionId={scanSessionId}
+        studentForm={studentForm}
+        studentResponses={studentResponses}
+        setStudentResponses={setStudentResponses}
+        studentLoc={studentLoc}
+        studentLocLoading={studentLocLoading}
+        studentSubmitting={studentSubmitting}
+        studentResult={studentResult}
+        studentError={studentError}
+        onGetStudentGPS={getStudentGPS}
+        onSubmitStudentAttendance={handleStudentSubmit}
+      />
     );
   }
 
-  // VIEW 1: TEACHER LOGIN / SIGNUP FORM
-  if (!token) {
-    return (
-      <div className="container">
-        <h1 className="title">Teacher Attendance Portal</h1>
-        <p className="subtitle">
-          {isSignup ? 'Register a new Teacher account' : 'Sign in to start dynamic geofenced attendance sessions'}
-        </p>
-
-        {authError && <div className="alert-error">{authError}</div>}
-        {authSuccess && (
-          <div style={{ background: '#065f46', color: '#a7f3d0', padding: '12px 16px', borderRadius: 10, fontSize: 14, marginBottom: 20 }}>
-            {authSuccess}
-          </div>
-        )}
-
-        {GOOGLE_CLIENT_ID && (
-          <>
-            <div id="google-signin-button" style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}></div>
-            <div style={{ textAlign: 'center', color: '#64748b', fontSize: 13, margin: '4px 0 20px' }}>
-              — or continue with username &amp; password —
-            </div>
-          </>
-        )}
-
-        {isSignup ? (
-          <form onSubmit={handleSignup}>
-            <div className="form-group">
-              <label>Teacher Username</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. prof_smith"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                required
-                placeholder="prof.smith@college.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <button type="submit" className="btn">Register Account</button>
-
-            <div style={{ textAlign: 'center', marginTop: 18, fontSize: 14, color: '#cbd5e1' }}>
-              Already registered?{' '}
-              <button
-                type="button"
-                onClick={() => { setIsSignup(false); setAuthError(''); setAuthSuccess(''); }}
-                style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 600 }}
-              >
-                Sign In here
-              </button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label>Teacher Username</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. prof_smith"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <button type="submit" className="btn">Sign In</button>
-
-            <div style={{ textAlign: 'center', marginTop: 18, fontSize: 14, color: '#cbd5e1' }}>
-              New Teacher?{' '}
-              <button
-                type="button"
-                onClick={() => { setIsSignup(true); setAuthError(''); setAuthSuccess(''); }}
-                style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 600 }}
-              >
-                Create an Account
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-    );
-  }
-
-  // VIEW 3: LIVE ACTIVE SESSION & PROJECTION SCREEN
-  if (activeSession) {
-    // Dynamic QR scan URL using currently deployed domain (Vercel)
-    const qrScanUrl = `${window.location.origin}/?session_id=${activeSession.session_id}&qr_token=${currentToken}`;
-
-    return (
-      <div className="container">
-        <h1 className="title">Live Attendance Session</h1>
-        <p className="subtitle">Project this screen live for students to scan QR</p>
-
-        <div className="qr-card">
-          <div style={{ color: '#38bdf8', fontWeight: 700, fontSize: 20 }}>
-            Class: {activeSession.class_id}
-          </div>
-          <div style={{ color: '#94a3b8', fontSize: 13, marginTop: 4 }}>
-            Geofence Radius: {activeSession.radius_meters}m
-          </div>
-
-          <div className="qr-wrapper">
-            {currentToken ? (
-              <QRCodeSVG
-                value={qrScanUrl}
-                size={230}
-                level="H"
-                includeMargin={true}
-              />
-            ) : (
-              <div style={{ padding: 40, color: '#000' }}>Loading QR...</div>
-            )}
-          </div>
-
-          <div>
-            <span className="timer-badge">
-              ⏱ Rotates in {expiresIn}s
-            </span>
-          </div>
-
-          <div style={{ marginTop: 16, fontSize: 12, color: '#64748b', wordBreak: 'break-all' }}>
-            Scannable Mobile URL: <code style={{ color: '#38bdf8' }}>{qrScanUrl}</code>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-          <button
-            onClick={() => downloadExcel(activeSession.session_id, activeSession.class_id)}
-            className="btn"
-            style={{ background: '#16a34a', flex: 1 }}
-          >
-            📥 Live Excel Sheet
-          </button>
-          <button
-            onClick={handleEndSession}
-            className="btn btn-danger"
-            style={{ flex: 1 }}
-          >
-            🔴 End Session
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // VIEW 2: TEACHER DASHBOARD
+  // Application Routes
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div>
-          <h1 className="title" style={{ textAlign: 'left' }}>Teacher Dashboard</h1>
-          <p className="subtitle" style={{ textAlign: 'left', marginBottom: 0 }}>Create templates & start live attendance</p>
-        </div>
-        <button onClick={handleLogout} className="btn-secondary btn-sm">
-          Logout
-        </button>
-      </div>
-
-      <div className="nav-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'session' ? 'active' : ''}`}
-          onClick={() => setActiveTab('session')}
-        >
-          ⚡ Start Session
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'templates' ? 'active' : ''}`}
-          onClick={() => setActiveTab('templates')}
-        >
-          📋 Form Templates ({templates.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('history'); fetchPastSessions(); }}
-        >
-          📊 History & Excel
-        </button>
-      </div>
-
-      {activeTab === 'session' && (
-        <div>
-          <div className="gps-box">
-            <button
-              type="button"
-              onClick={getGPSLocation}
-              className="btn"
-              style={{ background: '#0284c7', padding: '10px 16px', fontSize: 14 }}
-            >
-              {locLoading ? 'Fetching GPS Coordinates...' : '📍 Grab Current GPS Location'}
-            </button>
-
-            {location ? (
-              <div className="gps-coords">
-                Lat: {location.lat.toFixed(6)}, Long: {location.long.toFixed(6)}
-              </div>
-            ) : (
-              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>
-                Click button to capture classroom geofence center coordinates.
-              </div>
-            )}
-          </div>
-
-          <form onSubmit={handleStartSession}>
-            <div className="form-group">
-              <label>Class ID / Subject Name</label>
-              <input
-                type="text"
-                required
-                value={classId}
-                onChange={(e) => setClassId(e.target.value)}
-                placeholder="e.g. CS101-Lecture"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Geofence Radius (meters)</label>
-              <input
-                type="number"
-                required
-                value={radiusMeters}
-                onChange={(e) => setRadiusMeters(e.target.value)}
-                placeholder="30"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Select Attendance Form Template</label>
-              <select
-                value={selectedTemplateId}
-                onChange={(e) => setSelectedTemplateId(e.target.value)}
-              >
-                <option value="">-- Standard Default Form (Roll Number & Name) --</option>
-                {templates.map((tpl) => (
-                  <option key={tpl.id} value={tpl.id}>
-                    📋 {tpl.template_name} ({tpl.fields.length} custom fields)
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button type="submit" className="btn" style={{ marginTop: 10 }}>
-              🚀 Start Attendance Session & Display QR
-            </button>
-          </form>
-        </div>
-      )}
-
-      {activeTab === 'templates' && (
-        <div>
-          <div style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 16, marginBottom: 12, color: '#cbd5e1' }}>Saved Form Templates</h3>
-            {templates.length === 0 ? (
-              <div style={{ padding: 16, background: '#0f172a', borderRadius: 10, color: '#94a3b8', fontSize: 13 }}>
-                No saved templates yet. Create your first template below!
-              </div>
-            ) : (
-              templates.map((tpl) => (
-                <div key={tpl.id} className="template-card">
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: 15, color: '#38bdf8' }}>
-                      {tpl.template_name}
-                    </div>
-                    <div style={{ marginTop: 6 }}>
-                      {tpl.fields.map((f, i) => (
-                        <span key={i} className="field-badge">
-                          {f.label} ({f.type}) {f.is_unique_id ? '🔑 Unique' : ''}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteTemplate(tpl.id)}
-                    className="btn-danger btn-sm"
-                    style={{ borderRadius: 6 }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-
-          <hr style={{ borderColor: '#334155', margin: '24px 0' }} />
-
-          <form onSubmit={handleSaveNewTemplate}>
-            <h3 style={{ fontSize: 16, marginBottom: 14, color: '#38bdf8' }}>➕ Build New Attendance Template</h3>
-
-            <div className="form-group">
-              <label>Template Name</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. CS 3rd Year Attendance"
-                value={newTemplateName}
-                onChange={(e) => setNewTemplateName(e.target.value)}
-              />
-            </div>
-
-            <div style={{ marginBottom: 12, fontSize: 13, color: '#cbd5e1', fontWeight: 600 }}>
-              Form Fields Builder:
-            </div>
-
-            {builderFields.map((field, idx) => (
-              <div key={idx} className="field-creator-item">
-                <div className="flex-row" style={{ marginBottom: 10 }}>
-                  <div style={{ flex: 2 }}>
-                    <label>Field Label</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Roll Number, Branch"
-                      value={field.label}
-                      onChange={(e) => handleFieldChange(idx, 'label', e.target.value)}
-                    />
-                  </div>
-
-                  <div style={{ flex: 1 }}>
-                    <label>Field Type</label>
-                    <select
-                      value={field.type}
-                      onChange={(e) => handleFieldChange(idx, 'type', e.target.value)}
-                    >
-                      <option value="text">Text Input</option>
-                      <option value="number">Number</option>
-                      <option value="dropdown">Dropdown</option>
-                    </select>
-                  </div>
-                </div>
-
-                {field.type === 'dropdown' && (
-                  <div className="form-group" style={{ marginBottom: 10 }}>
-                    <label>Dropdown Options (comma-separated)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. CSE, ECE, ME, Civil"
-                      value={field.options}
-                      onChange={(e) => handleFieldChange(idx, 'options', e.target.value)}
-                    />
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 8 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, textTransform: 'none', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      style={{ width: 'auto' }}
-                      checked={field.is_unique_id}
-                      onChange={(e) => handleFieldChange(idx, 'is_unique_id', e.target.checked)}
-                    />
-                    🔑 Is Unique Student ID (Roll No)?
-                  </label>
-
-                  {builderFields.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveField(idx)}
-                      style={{ background: 'transparent', color: '#f87171', border: 'none', cursor: 'pointer', fontSize: 12 }}
-                    >
-                      Remove Field
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={handleAddField}
-              className="btn-secondary"
-              style={{ marginBottom: 20, fontSize: 13 }}
-            >
-              ➕ Add Another Field
-            </button>
-
-            <button type="submit" className="btn">
-              💾 Save Form Template
-            </button>
-          </form>
-        </div>
-      )}
-
-      {activeTab === 'history' && (
-        <div>
-          <h3 style={{ fontSize: 16, marginBottom: 14, color: '#cbd5e1' }}>Past Attendance Sessions</h3>
-          {pastSessions.length === 0 ? (
-            <div style={{ padding: 16, background: '#0f172a', borderRadius: 10, color: '#94a3b8', fontSize: 13 }}>
-              No attendance sessions recorded yet. Start a session to view history!
-            </div>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <HomePage
+            onNavigateLogin={() => navigate(token ? '/dashboard' : '/login')}
+            onNavigateSignup={() => navigate('/login')}
+            onLaunchSession={() => navigate(token ? '/dashboard' : '/login')}
+          />
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <LoginSignup
+            onLogin={handleLogin}
+            onSignup={handleSignup}
+            authError={authError}
+            authSuccess={authSuccess}
+            googleClientId={GOOGLE_CLIENT_ID}
+            googleSigninButtonRef={googleSigninButtonRef}
+          />
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          token ? (
+            <TeacherDashboard
+              templates={templates}
+              pastSessions={pastSessions}
+              activeSession={activeSession}
+              location={teacherLoc}
+              locLoading={teacherLocLoading}
+              classId={classId}
+              setClassId={setClassId}
+              radiusMeters={radiusMeters}
+              setRadiusMeters={setRadiusMeters}
+              selectedTemplateId={selectedTemplateId}
+              setSelectedTemplateId={setSelectedTemplateId}
+              onGetGPSLocation={getGPSLocation}
+              onStartSession={handleStartSession}
+              onEndSession={handleEndSession}
+              onOpenLiveSession={() => navigate('/live')}
+              onNavigateTab={(tab) => {
+                if (tab === 'templates') navigate('/templates');
+                else if (tab === 'live-session') navigate('/live');
+                else if (tab === 'history' || tab === 'dashboard') navigate('/dashboard');
+              }}
+              onDownloadExcel={downloadExcel}
+              onLogout={handleLogout}
+            />
           ) : (
-            pastSessions.map((sess) => (
-              <div key={sess.session_id} className="template-card">
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 15, color: '#38bdf8' }}>
-                    Class: {sess.class_id} (Session #{sess.session_id})
-                  </div>
-                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
-                    Status: {sess.is_active ? '🟢 ACTIVE LIVE' : '🔴 CLOSED'} | Radius: {sess.radius_meters}m
-                  </div>
-                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                    Started: {new Date(sess.start_time).toLocaleString()}
-                  </div>
-                </div>
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/live"
+        element={
+          token ? (
+            <LiveQRSession
+              activeSession={activeSession}
+              currentToken={currentToken}
+              expiresIn={expiresIn}
+              onEndSession={handleEndSession}
+              onDownloadExcel={downloadExcel}
+              onNavigateDashboard={() => navigate('/dashboard')}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/templates"
+        element={
+          token ? (
+            <TemplateBuilder
+              templates={templates}
+              newTemplateName={newTemplateName}
+              setNewTemplateName={setNewTemplateName}
+              builderFields={builderFields}
+              setBuilderFields={setBuilderFields}
+              onAddField={handleAddField}
+              onRemoveField={handleRemoveField}
+              onFieldChange={handleFieldChange}
+              onSaveTemplate={handleSaveNewTemplate}
+              onDeleteTemplate={handleDeleteTemplate}
+              onNavigateDashboard={() => navigate('/dashboard')}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/scan"
+        element={
+          <StudentAttendanceForm
+            scanSessionId={scanSessionId}
+            studentForm={studentForm}
+            studentResponses={studentResponses}
+            setStudentResponses={setStudentResponses}
+            studentLoc={studentLoc}
+            studentLocLoading={studentLocLoading}
+            studentSubmitting={studentSubmitting}
+            studentResult={studentResult}
+            studentError={studentError}
+            onGetStudentGPS={getStudentGPS}
+            onSubmitStudentAttendance={handleStudentSubmit}
+          />
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
 
-                <button
-                  onClick={() => downloadExcel(sess.session_id, sess.class_id)}
-                  className="btn btn-sm"
-                  style={{ background: '#16a34a', borderRadius: 8 }}
-                >
-                  📥 Export Excel (.xlsx)
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-    </div>
+export default function App() {
+  return (
+    <BrowserRouter>
+      <MainApp />
+    </BrowserRouter>
   );
 }
