@@ -54,6 +54,16 @@ function MainApp() {
 
   const googleSigninButtonRef = useRef(null);
 
+  const getTeacherName = () => {
+    if (!token) return 'Teacher';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return payload.sub || 'Teacher';
+    } catch (e) {
+      return 'Teacher';
+    }
+  };
+
   const getDeviceId = () => {
     let devId = localStorage.getItem('student_device_id');
     if (!devId) {
@@ -543,6 +553,7 @@ function MainApp() {
         element={
           token ? (
             <TeacherDashboard
+              teacherName={getTeacherName()}
               templates={templates}
               pastSessions={pastSessions}
               activeSession={activeSession}
@@ -593,6 +604,7 @@ function MainApp() {
         element={
           token ? (
             <TemplateBuilder
+              teacherName={getTeacherName()}
               templates={templates}
               newTemplateName={newTemplateName}
               setNewTemplateName={setNewTemplateName}
@@ -604,6 +616,7 @@ function MainApp() {
               onSaveTemplate={handleSaveNewTemplate}
               onDeleteTemplate={handleDeleteTemplate}
               onNavigateDashboard={() => navigate('/dashboard')}
+              onLogout={handleLogout}
             />
           ) : (
             <Navigate to="/login" replace />
