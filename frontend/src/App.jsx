@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 // API Base URL from Environment Variable (Vite) with local fallback for laptop development
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export default function App() {
   // Check if URL has student scan query params (?session_id=1&qr_token=xyz)
@@ -215,6 +216,45 @@ export default function App() {
     localStorage.removeItem('teacher_token');
     setActiveSession(null);
   };
+
+  const handleGoogleCredentialResponse = async (response) => {
+    setAuthError('');
+    setAuthSuccess('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_token: response.credential })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Google sign-in failed');
+      }
+      setToken(data.access_token);
+      localStorage.setItem('teacher_token', data.access_token);
+    } catch (err) {
+      setAuthError(err.message);
+    }
+  };
+
+  // Render the Google Sign-In button whenever the login/signup screen is showing
+  useEffect(() => {
+    if (!token && !scanSessionId && GOOGLE_CLIENT_ID && window.google) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse
+      });
+      const btnDiv = document.getElementById('google-signin-button');
+      if (btnDiv) {
+        btnDiv.innerHTML = '';
+        window.google.accounts.id.renderButton(btnDiv, {
+          theme: 'outline',
+          size: 'large',
+          width: 320
+        });
+      }
+    }
+  }, [token, scanSessionId, isSignup]);
 
   const fetchTemplates = async () => {
     try {
@@ -551,6 +591,15 @@ export default function App() {
           <div style={{ background: '#065f46', color: '#a7f3d0', padding: '12px 16px', borderRadius: 10, fontSize: 14, marginBottom: 20 }}>
             {authSuccess}
           </div>
+        )}
+
+        {GOOGLE_CLIENT_ID && (
+          <>
+            <div id="google-signin-button" style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}></div>
+            <div style={{ textAlign: 'center', color: '#64748b', fontSize: 13, margin: '4px 0 20px' }}>
+              — or continue with username &amp; password —
+            </div>
+          </>
         )}
 
         {isSignup ? (

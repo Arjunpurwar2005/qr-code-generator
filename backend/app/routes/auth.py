@@ -1,16 +1,22 @@
+import os
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
 
 from app.core.database import get_db
 from app.models.db_models import Teacher
-from app.schemas.auth import TeacherSignup, TeacherLogin, TokenResponse
+from app.schemas.auth import TeacherSignup, TeacherLogin, TokenResponse, GoogleAuthRequest
 from app.utils.security import (
     hash_password,
     verify_password,
     create_access_token,
     decode_access_token
 )
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 
 router = APIRouter(tags=["Authentication"])
 
@@ -116,6 +122,82 @@ def login(login_data: TeacherLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": teacher.username})
 
     # 4. Return token response
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/auth/google", response_model=TokenResponse)
+def google_login(auth_data: GoogleAuthRequest, db: Session = Depends(get_db)):
+    """
+    Authenticate (or auto-register) a teacher using a Google Sign-In ID token.
+
+    WHY VERIFY SERVER-SIDE?
+    ------------------------
+    The frontend gets an ID token (a signed JWT) directly from Google after
+    the user signs in. We NEVER trust this token as-is — we verify its
+    signature and audience (client ID) against Google's servers here, so a
+    malicious client can't forge a fake Google identity.
+
+    If no Teacher account exists for this Google email yet, one is created
+    automatically (auto-signup on first Google login). The stored password
+    hash is a random, unusable value since this account only ever logs in
+    via Google.
+    """
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google Sign-In is not configured on the server (missing GOOGLE_CLIENT_ID)."
+        )
+
+    # 1. Verify the ID token's signature, expiry, and audience against Google
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            auth_data.id_token,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Google ID token."
+        )
+
+    google_email = idinfo.get("email")
+    email_verified = idinfo.get("email_verified", False)
+
+    if not google_email or not email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google account email is missing or unverified."
+        )
+
+    # 2. Find existing teacher by email, or auto-create one
+    teacher = db.query(Teacher).filter(Teacher.email == google_email).first()
+
+    if not teacher:
+        # Derive a base username from the email (e.g. "rahul.sharma@gmail.com" -> "rahul.sharma")
+        base_username = google_email.split("@")[0]
+        candidate_username = base_username
+        suffix = 1
+        # Ensure username uniqueness (in case of collision with an existing account)
+        while db.query(Teacher).filter(Teacher.username == candidate_username).first():
+            candidate_username = f"{base_username}{suffix}"
+            suffix += 1
+
+        # Random unusable password hash — this account only ever authenticates via Google
+        random_unusable_password = secrets.token_urlsafe(32)
+        hashed_pwd = hash_password(random_unusable_password)
+
+        teacher = Teacher(
+            username=candidate_username,
+            email=google_email,
+            hashed_password=hashed_pwd
+        )
+        db.add(teacher)
+        db.commit()
+        db.refresh(teacher)
+
+    # 3. Issue our own JWT, same as normal login, so the rest of the app doesn't need to change
+    access_token = create_access_token(data={"sub": teacher.username})
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/protected-test")
