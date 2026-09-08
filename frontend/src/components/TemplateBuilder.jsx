@@ -14,6 +14,7 @@ export default function TemplateBuilder({
   onSaveTemplate,
   onDeleteTemplate,
   onNavigateDashboard,
+  onNavigateHome,
   onLogout
 }) {
   const [showBuilder, setShowBuilder] = useState(false);
@@ -26,7 +27,8 @@ export default function TemplateBuilder({
           <div className="flex items-center gap-6">
             <div
               className="flex items-center gap-2.5 cursor-pointer group"
-              onClick={onNavigateDashboard}
+              onClick={onNavigateHome}
+              title="Return to Home Page"
             >
               <div className="w-9 h-9 rounded-xl bg-rq-navy flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform">
                 <span className="text-rq-orange">R</span>Q
@@ -57,13 +59,20 @@ export default function TemplateBuilder({
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onNavigateHome}
+              className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-rq-navy hover:bg-slate-100 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">west</span>
+              <span className="hidden sm:inline">← Back to Home</span>
+            </button>
             <button
               onClick={onNavigateDashboard}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-sm transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-rq-navy font-label-md transition-colors cursor-pointer flex items-center gap-1"
             >
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="material-symbols-outlined text-[18px]">dashboard</span>
+              <span>Dashboard</span>
             </button>
           </div>
         </div>
