@@ -8,6 +8,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        /* ── RollQR Home Palette ───────────────────────── */
+        "rq-navy":   "#101828",
+        "rq-navy2":  "#1D2939",
+        "rq-orange": "#F97316",
+        "rq-orange-light": "#FEF0E7",
+        "rq-orange-mid":   "#FB923C",
+        "rq-cream":  "#FFF9F5",
+        "rq-gray":   "#F5F6F8",
+        "rq-gray2":  "#E4E7EC",
+        "rq-muted":  "#667085",
+        "rq-red":    "#DC2626",   /* KCCITM brand red */
+        /* ── Original tokens (kept for dashboard) ──────── */
+
         "on-primary-fixed": "#0b1d2b",
         "error": "#ba1a1a",
         "primary-fixed-dim": "#b6c8dc",
@@ -87,20 +100,22 @@ export default {
         "space-2xl": "3rem"
       },
       fontFamily: {
+        "manrope": ["Manrope", "sans-serif"],
+        "rq-body": ["Inter", "sans-serif"],
         "body-lg": ["Inter", "sans-serif"],
         "label-lg": ["Inter", "sans-serif"],
-        "headline-sm": ["Outfit", "sans-serif"],
+        "headline-sm": ["Manrope", "sans-serif"],
         "body-sm": ["Inter", "sans-serif"],
         "label-sm": ["Inter", "sans-serif"],
         "body-md": ["Inter", "sans-serif"],
         "label-md": ["Inter", "sans-serif"],
-        "headline-lg": ["Outfit", "sans-serif"],
-        "display-hero": ["Outfit", "sans-serif"],
-        "headline-lg-mobile": ["Outfit", "sans-serif"],
-        "display-hero-mobile": ["Outfit", "sans-serif"],
-        "headline-md": ["Outfit", "sans-serif"],
+        "headline-lg": ["Manrope", "sans-serif"],
+        "display-hero": ["Manrope", "sans-serif"],
+        "headline-lg-mobile": ["Manrope", "sans-serif"],
+        "display-hero-mobile": ["Manrope", "sans-serif"],
+        "headline-md": ["Manrope", "sans-serif"],
         "sans": ["Inter", "sans-serif"],
-        "headline": ["Outfit", "sans-serif"]
+        "headline": ["Manrope", "sans-serif"]
       },
       fontSize: {
         "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
