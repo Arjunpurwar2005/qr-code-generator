@@ -7,6 +7,11 @@ class StartSessionRequest(BaseModel):
     """
     Request model for starting an attendance session.
     Teacher can provide a saved template_id OR supply custom_fields directly.
+
+    teacher_lat/teacher_long: the TEACHER's own current GPS location (captured
+    by the frontend via browser geolocation) — used only to verify they are
+    physically on their institution's campus, if that institution has campus
+    geofencing configured. Optional if the teacher's domain isn't registered.
     """
     class_id: str = Field(..., example="CS101")
     center_lat: float = Field(..., example=28.6139)
@@ -14,6 +19,8 @@ class StartSessionRequest(BaseModel):
     radius_meters: float = Field(default=30.0, example=30.0)
     template_id: Optional[int] = Field(default=None, example=1)
     custom_fields: Optional[List[FormFieldSchema]] = Field(default=None)
+    teacher_lat: Optional[float] = Field(default=None)
+    teacher_long: Optional[float] = Field(default=None)
 
 class SessionResponse(BaseModel):
     """

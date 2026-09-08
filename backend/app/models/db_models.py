@@ -105,3 +105,27 @@ class AttendanceRecord(Base):
 
     # Relationship
     session = relationship("Session", back_populates="attendance_records")
+
+
+class Institution(Base):
+    """
+    SQLAlchemy model for the 'institutions' table.
+    WHY: Lets an admin register a college's email domain along with its
+    campus GPS location + radius. When a teacher with that email domain
+    tries to START A SESSION, their own current location is checked
+    against this campus geofence (see app/utils/institution_access.py) —
+    this stops a teacher from starting a fake session from home.
+    Domains NOT present in this table are unrestricted (no change in behavior).
+    """
+    __tablename__ = "institutions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(String, unique=True, index=True, nullable=False)  # e.g. "globalcollege.ac.in"
+    name = Column(String, nullable=True)  # display name, e.g. "Global College of Engineering"
+
+    # Campus geofence: teacher must be physically within this radius to start a session
+    campus_lat = Column(Float, nullable=False)
+    campus_long = Column(Float, nullable=False)
+    campus_radius_meters = Column(Float, default=200.0, nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

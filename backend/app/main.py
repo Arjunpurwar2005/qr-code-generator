@@ -7,6 +7,7 @@ from app.routes.auth import router as auth_router
 from app.routes.session import router as session_router
 from app.routes.template import router as template_router
 from app.routes.attendance import router as attendance_router
+from app.routes.admin import router as admin_router
 
 # Auto-create tables in PostgreSQL database
 Base.metadata.create_all(bind=engine)
@@ -32,6 +33,7 @@ app.include_router(auth_router)
 app.include_router(template_router)
 app.include_router(session_router)
 app.include_router(attendance_router)
+app.include_router(admin_router)
 
 @app.get("/")
 def read_root():

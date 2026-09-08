@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Institutions</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    margin: 0;
+    padding: 24px;
+  }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 24px; }
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    max-width: 900px;
+  }
+  label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; margin-top: 12px; }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-size: 14px;
+  }
+  input:focus { outline: none; border-color: #3b82f6; }
+  button {
+    margin-top: 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover { background: #2563eb; }
+  button.danger { background: #dc2626; }
+  button.danger:hover { background: #b91c1c; }
+  button.secondary { background: #334155; margin-left: 8px; }
+  button.secondary:hover { background: #475569; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #334155; }
+  th { color: #94a3b8; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  .error { color: #fca5a5; font-size: 13px; margin-top: 10px; }
+  .hint { color: #64748b; font-size: 12px; margin-top: 4px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 160px; }
+</style>
+</head>
+<body>
+
+  <h1>🏫 Institution Admin Panel</h1>
+  <div class="subtitle">Set each college's campus location — teachers on that domain can only start a session while physically on campus</div>
+
+  <div class="card" id="setupCard">
+    <label>Backend URL</label>
+    <input id="backendUrl" placeholder="https://your-backend.onrender.com" />
+    <label>Admin Secret</label>
+    <input id="adminSecret" type="password" placeholder="Your ADMIN_SECRET" />
+    <button onclick="saveConfigAndLoad()">Connect</button>
+    <div class="error" id="configError"></div>
+  </div>
+
+  <div class="card" id="addCard" style="display:none;">
+    <h3 style="margin-top:0;">Add / Update Institution</h3>
+    <div class="row">
+      <div>
+        <label>Email Domain</label>
+        <input id="newDomain" placeholder="globalcollege.ac.in" />
+      </div>
+      <div>
+        <label>College Name (optional)</label>
+        <input id="newName" placeholder="Global College of Engineering" />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Campus Latitude</label>
+        <input id="newLat" placeholder="28.6139" />
+      </div>
+      <div>
+        <label>Campus Longitude</label>
+        <input id="newLong" placeholder="77.2090" />
+      </div>
+      <div>
+        <label>Radius (meters)</label>
+        <input id="newRadius" type="number" value="200" min="10" />
+      </div>
+    </div>
+    <div class="hint">Tip: open Google Maps, right-click the campus location → the lat/long appears at the top — click to copy.</div>
+    <button onclick="useMyLocation()">📍 Use my current location</button>
+    <button onclick="addOrUpdate()">Save Institution</button>
+    <div class="error" id="addError"></div>
+  </div>
+
+  <div class="card" id="listCard" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0;">Registered Institutions</h3>
+      <button class="secondary" onclick="loadInstitutions()">Refresh</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Domain</th>
+          <th>Name</th>
+          <th>Campus Lat, Long</th>
+          <th>Radius (m)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+<script>
+  function getConfig() {
+    return {
+      backendUrl: localStorage.getItem('admin_backend_url') || '',
+      adminSecret: localStorage.getItem('admin_secret') || ''
+    };
+  }
+
+  function saveConfigAndLoad() {
+    const backendUrl = document.getElementById('backendUrl').value.trim().replace(/\/$/, '');
+    const adminSecret = document.getElementById('adminSecret').value.trim();
+    if (!backendUrl || !adminSecret) {
+      document.getElementById('configError').innerText = 'Both fields are required.';
+      return;
+    }
+    localStorage.setItem('admin_backend_url', backendUrl);
+    localStorage.setItem('admin_secret', adminSecret);
+    document.getElementById('configError').innerText = '';
+    document.getElementById('addCard').style.display = 'block';
+    document.getElementById('listCard').style.display = 'block';
+    loadInstitutions();
+  }
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation not supported in this browser.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        document.getElementById('newLat').value = pos.coords.latitude.toFixed(6);
+        document.getElementById('newLong').value = pos.coords.longitude.toFixed(6);
+      },
+      (err) => alert('Could not get location: ' + err.message)
+    );
+  }
+
+  async function loadInstitutions() {
+    const { backendUrl, adminSecret } = getConfig();
+    try {
+      const res = await fetch(`${backendUrl}/admin/institutions`, {
+        headers: { 'X-Admin-Secret': adminSecret }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Failed to load institutions');
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      data.forEach(inst => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${inst.domain}</td>
+          <td>${inst.name || '-'}</td>
+          <td>${inst.campus_lat.toFixed(5)}, ${inst.campus_long.toFixed(5)}</td>
+          <td>${inst.campus_radius_meters}</td>
+          <td><button class="danger" onclick="deleteInstitution(${inst.id})">Delete</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function addOrUpdate() {
+    const { backendUrl, adminSecret } = getConfig();
+    const domain = document.getElementById('newDomain').value.trim().toLowerCase();
+    const name = document.getElementById('newName').value.trim();
+    const lat = parseFloat(document.getElementById('newLat').value);
+    const long = parseFloat(document.getElementById('newLong').value);
+    const radius = parseFloat(document.getElementById('newRadius').value) || 200;
+
+    if (!domain || isNaN(lat) || isNaN(long)) {
+      document.getElementById('addError').innerText = 'Domain, latitude and longitude are required.';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${backendUrl}/admin/institutions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': adminSecret },
+        body: JSON.stringify({
+          domain,
+          name: name || null,
+          campus_lat: lat,
+          campus_long: long,
+          campus_radius_meters: radius
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Failed to save institution');
+
+      document.getElementById('addError').innerText = '';
+      document.getElementById('newDomain').value = '';
+      document.getElementById('newName').value = '';
+      document.getElementById('newLat').value = '';
+      document.getElementById('newLong').value = '';
+      document.getElementById('newRadius').value = '200';
+      loadInstitutions();
+    } catch (err) {
+      document.getElementById('addError').innerText = err.message;
+    }
+  }
+
+  async function deleteInstitution(id) {
+    if (!confirm('Remove this institution? Its teachers will be able to start sessions from anywhere again.')) return;
+    const { backendUrl, adminSecret } = getConfig();
+    try {
+      const res = await fetch(`${backendUrl}/admin/institutions/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Secret': adminSecret }
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || 'Failed to delete');
+      }
+      loadInstitutions();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  window.onload = () => {
+    const { backendUrl, adminSecret } = getConfig();
+    if (backendUrl && adminSecret) {
+      document.getElementById('backendUrl').value = backendUrl;
+      document.getElementById('adminSecret').value = adminSecret;
+      document.getElementById('addCard').style.display = 'block';
+      document.getElementById('listCard').style.display = 'block';
+      loadInstitutions();
+    }
+  };
+</script>
+
+</body>
+</html>

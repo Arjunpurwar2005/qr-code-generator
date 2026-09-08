@@ -15,6 +15,7 @@ from app.schemas.session import (
 )
 from app.utils.qr_token import generate_qr_token
 from app.utils.excel_export import generate_attendance_excel
+from app.utils.institution_access import check_teacher_campus_location
 
 router = APIRouter(prefix="/session", tags=["Attendance Session"])
 
@@ -32,6 +33,14 @@ def start_session(
     teacher = db.query(Teacher).filter(Teacher.username == current_username).first()
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher account not found.")
+
+    # Block if this teacher's domain has campus geofencing enabled and they're off-campus
+    check_teacher_campus_location(
+        email=teacher.email,
+        teacher_lat=session_data.teacher_lat,
+        teacher_long=session_data.teacher_long,
+        db=db
+    )
 
     form_fields_list = []
     if session_data.template_id:

@@ -426,7 +426,9 @@ function MainApp() {
         class_id: classId,
         center_lat: teacherLoc.lat,
         center_long: teacherLoc.long,
-        radius_meters: parseFloat(radiusMeters)
+        radius_meters: parseFloat(radiusMeters),
+        teacher_lat: teacherLoc.lat,
+        teacher_long: teacherLoc.long
       };
 
       if (selectedTemplateId) {
