@@ -8,7 +8,8 @@ export default function LiveQRSession({
   expiresIn = 18,
   onEndSession,
   onDownloadExcel,
-  onNavigateDashboard
+  onNavigateDashboard,
+  onNavigateHome
 }) {
   const [timerText, setTimerText] = useState(expiresIn || 18);
   const [isLocked, setIsLocked] = useState(false);
@@ -20,7 +21,7 @@ export default function LiveQRSession({
   }, [expiresIn]);
 
   useEffect(() => {
-    if (isLocked || sessionEndedState) return;
+    if (isLocked || sessionEndedState || !activeSession) return;
     const interval = setInterval(() => {
       setTimerText((prev) => {
         if (typeof prev === 'number' && prev <= 1) {
@@ -30,7 +31,7 @@ export default function LiveQRSession({
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isLocked, sessionEndedState]);
+  }, [isLocked, sessionEndedState, activeSession]);
 
   const qrScanUrl = activeSession
     ? `${window.location.origin}/?session_id=${activeSession.session_id}&qr_token=${currentToken}`
@@ -53,7 +54,8 @@ export default function LiveQRSession({
           <div className="flex items-center gap-3">
             <div
               className="flex items-center gap-2.5 cursor-pointer group"
-              onClick={onNavigateDashboard}
+              onClick={onNavigateHome}
+              title="Return to Home Page"
             >
               <div className="w-9 h-9 rounded-xl bg-rq-orange text-white font-bold text-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                 RQ
@@ -63,20 +65,20 @@ export default function LiveQRSession({
               </span>
             </div>
             <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400 pl-3 border-l border-slate-800">
-              <span className={`w-2 h-2 rounded-full ${sessionEndedState ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></span>
+              <span className={`w-2 h-2 rounded-full ${!activeSession ? 'bg-slate-500' : sessionEndedState ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></span>
               <span className="uppercase font-bold tracking-wider text-emerald-400">
-                {sessionEndedState ? 'Session Ended' : 'Live Attendance Control'}
+                {!activeSession ? 'Session Portal' : sessionEndedState ? 'Session Ended' : 'Live Attendance Control'}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => onDownloadExcel?.(activeSession?.session_id, activeSession?.class_id)}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+              onClick={onNavigateHome}
+              className="px-3.5 py-1.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px] text-emerald-400">download</span>
-              <span>Download Excel</span>
+              <span className="material-symbols-outlined text-[16px]">west</span>
+              <span>← Back to Home</span>
             </button>
             <button
               onClick={onNavigateDashboard}
@@ -91,8 +93,38 @@ export default function LiveQRSession({
 
       {/* Main Control Room Body */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col items-center justify-center">
-        {sessionEndedState ? (
-          /* Polished Completion State */
+        {!activeSession && !sessionEndedState ? (
+          /* SCENARIO A: No Active Attendance Session */
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-xl bg-slate-950/80 rounded-3xl border border-slate-800 p-8 sm:p-12 text-center space-y-6 shadow-2xl relative overflow-hidden"
+          >
+            <div className="w-20 h-20 rounded-full bg-slate-900 text-slate-400 border border-slate-800 mx-auto flex items-center justify-center text-4xl shadow-inner">
+              <span className="material-symbols-outlined text-[36px]">sensors_off</span>
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="font-manrope font-extrabold text-2xl sm:text-3xl text-white">
+                No active attendance session
+              </h1>
+              <p className="text-slate-400 text-sm max-w-md mx-auto">
+                Create an attendance session and generate your QR code to manage it here.
+              </p>
+            </div>
+
+            <div className="pt-2 flex justify-center">
+              <button
+                onClick={onNavigateDashboard}
+                className="px-6 py-3 rounded-2xl bg-rq-orange hover:bg-orange-600 text-white font-manrope font-bold text-sm shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[20px]">add</span>
+                <span>Start Attendance</span>
+              </button>
+            </div>
+          </motion.div>
+        ) : sessionEndedState ? (
+          /* SCENARIO C: Polished Completed State */
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -137,7 +169,7 @@ export default function LiveQRSession({
             </div>
           </motion.div>
         ) : (
-          /* Live Control Room Content */
+          /* SCENARIO B: Live Active QR Session Control Room */
           <div className="w-full bg-slate-950/60 rounded-3xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex flex-col items-center text-center space-y-8 relative overflow-hidden">
             {/* Ambient Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rq-orange/10 rounded-full blur-3xl pointer-events-none"></div>

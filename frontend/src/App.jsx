@@ -201,7 +201,7 @@ function MainApp() {
       }
       setToken(data.access_token);
       localStorage.setItem('teacher_token', data.access_token);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       setAuthError(err.message);
     }
@@ -248,7 +248,7 @@ function MainApp() {
       }
       setToken(data.access_token);
       localStorage.setItem('teacher_token', data.access_token);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       setAuthError(err.message);
     }
@@ -531,9 +531,28 @@ function MainApp() {
         path="/"
         element={
           <HomePage
-            onNavigateLogin={() => navigate(token ? '/dashboard' : '/login')}
+            token={token}
+            teacherName={getTeacherName()}
+            activeSession={activeSession}
+            templates={templates}
+            location={teacherLoc}
+            locLoading={teacherLocLoading}
+            classId={classId}
+            setClassId={setClassId}
+            radiusMeters={radiusMeters}
+            setRadiusMeters={setRadiusMeters}
+            selectedTemplateId={selectedTemplateId}
+            setSelectedTemplateId={setSelectedTemplateId}
+            onGetGPSLocation={getGPSLocation}
+            onStartSession={handleStartSession}
+            onEndSession={handleEndSession}
+            onOpenLiveSession={() => navigate('/live')}
+            onNavigateDashboard={() => navigate('/dashboard')}
+            onNavigateSessions={() => navigate('/live')}
+            onNavigateTemplates={() => navigate('/templates')}
+            onNavigateLogin={() => navigate(token ? '/' : '/login')}
             onNavigateSignup={() => navigate('/login')}
-            onLaunchSession={() => navigate(token ? '/dashboard' : '/login')}
+            onLogout={handleLogout}
           />
         }
       />
@@ -576,6 +595,7 @@ function MainApp() {
                 else if (tab === 'live-session') navigate('/live');
                 else if (tab === 'history' || tab === 'dashboard') navigate('/dashboard');
               }}
+              onNavigateHome={() => navigate('/')}
               onDownloadExcel={downloadExcel}
               onLogout={handleLogout}
             />
@@ -595,6 +615,7 @@ function MainApp() {
               onEndSession={handleEndSession}
               onDownloadExcel={downloadExcel}
               onNavigateDashboard={() => navigate('/dashboard')}
+              onNavigateHome={() => navigate('/')}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -618,6 +639,7 @@ function MainApp() {
               onSaveTemplate={handleSaveNewTemplate}
               onDeleteTemplate={handleDeleteTemplate}
               onNavigateDashboard={() => navigate('/dashboard')}
+              onNavigateHome={() => navigate('/')}
               onLogout={handleLogout}
             />
           ) : (

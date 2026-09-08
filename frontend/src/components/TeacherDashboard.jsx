@@ -19,6 +19,7 @@ export default function TeacherDashboard({
   onEndSession,
   onOpenLiveSession,
   onNavigateTab,
+  onNavigateHome,
   onDownloadExcel,
   onLogout
 }) {
@@ -58,7 +59,8 @@ export default function TeacherDashboard({
           <div className="flex items-center gap-6">
             <div
               className="flex items-center gap-2.5 cursor-pointer group"
-              onClick={() => handleNavClick('dashboard')}
+              onClick={onNavigateHome}
+              title="Return to Home Page"
             >
               <div className="w-9 h-9 rounded-xl bg-rq-navy flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform">
                 <span className="text-rq-orange">R</span>Q
@@ -106,6 +108,13 @@ export default function TeacherDashboard({
 
           {/* Right Teacher Identity Profile & Logout */}
           <div className="flex items-center gap-4">
+            <button
+              onClick={onNavigateHome}
+              className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-rq-navy hover:bg-slate-100 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">west</span>
+              <span className="hidden sm:inline">← Back to Home</span>
+            </button>
             <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
               <div className="hidden sm:flex flex-col text-right">
                 <span className="text-sm font-bold text-rq-navy leading-snug capitalize">
