@@ -178,9 +178,39 @@ export default function LiveQRSession({
                 <p className="font-manrope font-bold text-base text-slate-900">
                   Scan to mark attendance
                 </p>
-                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 font-medium">
-                  <span className="material-symbols-outlined text-[16px] text-rq-orange animate-spin">sync</span>
-                  <span>QR refreshes in <strong className="text-slate-900 font-mono text-sm">{timerText}s</strong></span>
+                <div className="flex items-center justify-center gap-3 text-xs text-slate-500 font-medium pt-1">
+                  <div className="relative w-10 h-10 flex items-center justify-center">
+                    <svg className="w-10 h-10 transform -rotate-90">
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        className="text-slate-200"
+                        fill="transparent"
+                      />
+                      <circle
+                        cx="20"
+                        cy="20"
+                        r="16"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        className="text-rq-orange transition-all duration-1000 ease-linear"
+                        fill="transparent"
+                        strokeDasharray={100}
+                        strokeDashoffset={100 - ((typeof timerText === 'number' ? timerText : 20) / 20) * 100}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute font-mono font-bold text-xs text-slate-900">
+                      {timerText}s
+                    </span>
+                  </div>
+                  <div className="text-left leading-tight">
+                    <span className="block font-manrope font-bold text-xs text-slate-800">Dynamic Rolling Token</span>
+                    <span className="block text-[11px] text-slate-500">Refreshes every ~18–20 sec</span>
+                  </div>
                 </div>
               </div>
             </div>
