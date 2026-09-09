@@ -12,6 +12,19 @@ from app.routes.admin import router as admin_router
 # Auto-create tables in PostgreSQL database
 Base.metadata.create_all(bind=engine)
 
+# Auto-migrate: safely add any new columns to existing tables
+# Uses IF NOT EXISTS so it's safe to run on every startup
+def run_migrations():
+    with engine.connect() as conn:
+        migrations = [
+            "ALTER TABLE teachers ADD COLUMN IF NOT EXISTS profile_picture VARCHAR;",
+        ]
+        for stmt in migrations:
+            conn.execute(stmt)
+        conn.commit()
+
+run_migrations()
+
 # Initialize FastAPI application
 app = FastAPI(
     title="College Attendance System API",
