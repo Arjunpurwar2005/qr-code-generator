@@ -114,7 +114,7 @@ export default function TeacherDashboard({
               className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-rq-navy hover:bg-slate-100 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">west</span>
-              <span className="hidden sm:inline">← Back to Home</span>
+              <span className="hidden sm:inline">Back to Home</span>
             </button>
             <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
               <div className="hidden sm:flex flex-col text-right">
@@ -173,7 +173,7 @@ export default function TeacherDashboard({
               className="px-6 py-3 rounded-xl bg-rq-orange hover:bg-orange-600 text-white font-manrope font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[20px]">add</span>
-              <span>+ Start Attendance</span>
+              <span>Start Attendance</span>
             </button>
           </div>
         </div>
@@ -400,7 +400,7 @@ export default function TeacherDashboard({
                   className="px-6 py-3 rounded-xl bg-rq-navy hover:bg-slate-800 text-white font-manrope font-bold text-sm shadow-md transition-all inline-flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[18px]">add</span>
-                  <span>+ Start Attendance</span>
+                  <span>Start Attendance</span>
                 </button>
               </div>
             </div>
