@@ -119,7 +119,7 @@ def login(login_data: TeacherLogin, db: Session = Depends(get_db)):
         )
 
     # 3. Create JWT access token with payload {"sub": teacher.username}
-    access_token = create_access_token(data={"sub": teacher.username})
+    access_token = create_access_token(data={"sub": teacher.username, "picture": teacher.profile_picture})
 
     # 4. Return token response
     return {"access_token": access_token, "token_type": "bearer"}
@@ -162,6 +162,7 @@ def google_login(auth_data: GoogleAuthRequest, db: Session = Depends(get_db)):
 
     google_email = idinfo.get("email")
     email_verified = idinfo.get("email_verified", False)
+    google_picture = idinfo.get("picture")
 
     if not google_email or not email_verified:
         raise HTTPException(
@@ -189,14 +190,19 @@ def google_login(auth_data: GoogleAuthRequest, db: Session = Depends(get_db)):
         teacher = Teacher(
             username=candidate_username,
             email=google_email,
-            hashed_password=hashed_pwd
+            hashed_password=hashed_pwd,
+            profile_picture=google_picture
         )
         db.add(teacher)
         db.commit()
         db.refresh(teacher)
+    elif teacher.profile_picture != google_picture:
+        # Keep the stored picture fresh in case the teacher updated their Google photo
+        teacher.profile_picture = google_picture
+        db.commit()
 
     # 3. Issue our own JWT, same as normal login, so the rest of the app doesn't need to change
-    access_token = create_access_token(data={"sub": teacher.username})
+    access_token = create_access_token(data={"sub": teacher.username, "picture": teacher.profile_picture})
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -210,3 +216,23 @@ def protected_test_route(current_username: str = Depends(get_current_user)):
         "message": f"Hello {current_username}, you have accessed a protected route successfully!",
         "logged_in_as": current_username
     }
+
+@router.post("/auth/refresh", response_model=TokenResponse)
+def refresh_token(current_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Silent token refresh ("stay logged in" pattern) — same idea sites like
+    LeetCode use. The ACCESS_TOKEN itself still expires after a modest window
+    (see ACCESS_TOKEN_EXPIRE_MINUTES), but as long as the teacher opens the
+    app again before that window runs out, the frontend calls this endpoint
+    in the background to swap it for a brand-new token — so in practice they
+    never see a login screen unless they've been away longer than the window.
+
+    Requires a STILL-VALID token to call (get_current_user rejects an already
+    expired one) — you can't refresh a token that's already dead, only renew
+    one that's about to be.
+    """
+    teacher = db.query(Teacher).filter(Teacher.username == current_username).first()
+    new_access_token = create_access_token(
+        data={"sub": current_username, "picture": teacher.profile_picture if teacher else None}
+    )
+    return {"access_token": new_access_token, "token_type": "bearer"}

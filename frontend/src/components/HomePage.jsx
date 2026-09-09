@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 function FloatingNavbar({
   token,
   teacherName,
+  teacherPicture,
   onNavigateLogin,
   onNavigateSignup,
   onNavigateDashboard,
@@ -73,8 +74,18 @@ function FloatingNavbar({
               </button>
 
               <div className="flex items-center gap-2.5 border-l border-slate-200 pl-3">
-                <div className="w-8 h-8 rounded-full bg-rq-navy text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                  {teacherName ? teacherName.charAt(0).toUpperCase() : 'T'}
+                <div className="w-8 h-8 rounded-full bg-rq-navy text-white font-bold text-xs flex items-center justify-center shadow-xs overflow-hidden">
+                  {teacherPicture ? (
+                    <img
+                      src={teacherPicture}
+                      alt={teacherName}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    teacherName ? teacherName.charAt(0).toUpperCase() : 'T'
+                  )}
                 </div>
                 <span className="hidden lg:inline text-xs font-bold text-rq-navy capitalize">
                   {teacherName}
@@ -184,6 +195,7 @@ function FloatingNavbar({
 export default function HomePage({
   token,
   teacherName = "Teacher",
+  teacherPicture = null,
   activeSession,
   templates = [],
   location = null,
@@ -213,6 +225,7 @@ export default function HomePage({
       <FloatingNavbar
         token={token}
         teacherName={teacherName}
+        teacherPicture={teacherPicture}
         onNavigateLogin={onNavigateLogin}
         onNavigateSignup={onNavigateSignup}
         onNavigateDashboard={onNavigateDashboard}

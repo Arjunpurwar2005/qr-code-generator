@@ -30,6 +30,7 @@ function MainApp() {
 
   // --- TEACHER PORTAL STATE ---
   const [token, setToken] = useState(localStorage.getItem('teacher_token') || '');
+  const tokenRef = useRef(token);
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
 
@@ -64,6 +65,16 @@ function MainApp() {
     }
   };
 
+  const getTeacherPicture = () => {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return payload.picture || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const getDeviceId = () => {
     let devId = localStorage.getItem('student_device_id');
     if (!devId) {
@@ -87,6 +98,40 @@ function MainApp() {
       fetchPastSessions();
     }
   }, [token, scanSessionId]);
+
+  // 2b. Silent token refresh ("stay logged in" pattern, like LeetCode/Gmail).
+  // Keeps tokenRef in sync, then refreshes once on app load and every 20
+  // minutes after — so as long as this tab (or a revisit) happens within the
+  // token's window, the teacher never sees a login screen from natural expiry.
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
+
+  useEffect(() => {
+    const silentRefresh = async () => {
+      if (!tokenRef.current) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${tokenRef.current}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setToken(data.access_token);
+          localStorage.setItem('teacher_token', data.access_token);
+        }
+        // If it 401s here, we deliberately do nothing — the token had actually
+        // expired (teacher was away longer than the window). The next real
+        // action they take will go through authFetch and log them out cleanly.
+      } catch (err) {
+        console.error('Silent token refresh failed:', err);
+      }
+    };
+
+    silentRefresh();
+    const interval = setInterval(silentRefresh, 20 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // 3. Poll active session token
   useEffect(() => {
@@ -233,6 +278,27 @@ function MainApp() {
     navigate('/');
   };
 
+  // Wrapper around fetch() for authenticated (teacher) API calls.
+  // WHY: If the JWT has expired, the backend returns 401 — instead of every
+  // caller having to check for that, this catches it once, logs the teacher
+  // out, and shows a clear message, rather than leaving them "stuck" on a
+  // screen that looks logged in but silently fails on every action.
+  const authFetch = async (url, options = {}) => {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (res.status === 401) {
+      handleLogout();
+      setAuthError('Your session expired. Please log in again.');
+      throw new Error('Your session expired. Please log in again.');
+    }
+    return res;
+  };
+
   const handleGoogleCredentialResponse = async (response) => {
     setAuthError('');
     setAuthSuccess('');
@@ -276,9 +342,7 @@ function MainApp() {
 
   const fetchTemplates = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/templates`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await authFetch(`${API_BASE_URL}/templates`);
       if (res.ok) {
         const data = await res.json();
         setTemplates(data);
@@ -290,9 +354,7 @@ function MainApp() {
 
   const fetchPastSessions = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/session/my-sessions`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await authFetch(`${API_BASE_URL}/session/my-sessions`);
       if (res.ok) {
         const data = await res.json();
         setPastSessions(data);
@@ -303,9 +365,7 @@ function MainApp() {
   };
 
   const downloadExcel = (sessionId, className) => {
-    fetch(`${API_BASE_URL}/session/${sessionId}/export-excel`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
+    authFetch(`${API_BASE_URL}/session/${sessionId}/export-excel`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to export Excel');
         return res.blob();
@@ -325,9 +385,8 @@ function MainApp() {
   const handleDeleteTemplate = async (templateId) => {
     if (!window.confirm('Delete this template?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/templates/${templateId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await authFetch(`${API_BASE_URL}/templates/${templateId}`, {
+        method: 'DELETE'
       });
       if (res.ok) {
         fetchTemplates();
@@ -370,11 +429,10 @@ function MainApp() {
     }));
 
     try {
-      const res = await fetch(`${API_BASE_URL}/templates`, {
+      const res = await authFetch(`${API_BASE_URL}/templates`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           template_name: newTemplateName,
@@ -445,11 +503,10 @@ function MainApp() {
         payload.template_id = parseInt(selectedTemplateId);
       }
 
-      const res = await fetch(`${API_BASE_URL}/session/start`, {
+      const res = await authFetch(`${API_BASE_URL}/session/start`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       });
@@ -471,9 +528,8 @@ function MainApp() {
     if (!activeSession) return;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/session/${activeSession.session_id}/end`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await authFetch(`${API_BASE_URL}/session/${activeSession.session_id}/end`, {
+        method: 'POST'
       });
       if (res.ok) {
         const currentId = activeSession.session_id;
@@ -492,9 +548,7 @@ function MainApp() {
 
   const fetchCurrentToken = async (sessionId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/session/${sessionId}/current-token`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await authFetch(`${API_BASE_URL}/session/${sessionId}/current-token`);
       if (res.ok) {
         const data = await res.json();
         setCurrentToken(data.qr_token);
@@ -533,6 +587,7 @@ function MainApp() {
           <HomePage
             token={token}
             teacherName={getTeacherName()}
+            teacherPicture={getTeacherPicture()}
             activeSession={activeSession}
             templates={templates}
             location={teacherLoc}
@@ -575,6 +630,7 @@ function MainApp() {
           token ? (
             <TeacherDashboard
               teacherName={getTeacherName()}
+              teacherPicture={getTeacherPicture()}
               templates={templates}
               pastSessions={pastSessions}
               activeSession={activeSession}

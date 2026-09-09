@@ -14,6 +14,7 @@ class Teacher(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    profile_picture = Column(String, nullable=True)  # Google profile photo URL, if signed in via Google
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships

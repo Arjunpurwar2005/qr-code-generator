@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TeacherDashboard({
   teacherName = "Teacher",
+  teacherPicture = null,
   templates = [],
   pastSessions = [],
   activeSession = null,
@@ -122,8 +123,18 @@ export default function TeacherDashboard({
                 </span>
                 <span className="text-xs text-slate-500 font-medium">Faculty Member</span>
               </div>
-              <div className="w-9 h-9 rounded-full bg-rq-navy text-white font-bold flex items-center justify-center text-sm shadow-sm ring-2 ring-orange-100">
-                {teacherName.charAt(0).toUpperCase()}
+              <div className="w-9 h-9 rounded-full bg-rq-navy text-white font-bold flex items-center justify-center text-sm shadow-sm ring-2 ring-orange-100 overflow-hidden">
+                {teacherPicture ? (
+                  <img
+                    src={teacherPicture}
+                    alt={teacherName}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                ) : (
+                  teacherName.charAt(0).toUpperCase()
+                )}
               </div>
               <button
                 onClick={onLogout}
