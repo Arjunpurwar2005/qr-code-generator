@@ -19,6 +19,12 @@ export default {
         "rq-gray2":  "#E4E7EC",
         "rq-muted":  "#667085",
         "rq-red":    "#DC2626",
+        /* ── Flat Linear/Vercel Dark Mode Tokens ── */
+        "dark-bg":     "#0F1720",
+        "dark-card":   "#1A2530",
+        "dark-border": "#2A3844",
+        "dark-text":   "#E8EDF2",
+        "accent-blue": "#88BDF2",
         /* ── Original tokens (kept for dashboard) ──────── */
 
         "on-primary-fixed": "#0b1d2b",

@@ -77,35 +77,32 @@ function FloatingNavbar({
       <div
         className={`pointer-events-auto rounded-2xl border transition-all duration-300 px-4 sm:px-6 flex items-center justify-between gap-4 ${
           scrolled
-            ? 'bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl border-slate-300 dark:border-slate-800 shadow-md py-2.5'
-            : 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-slate-200/90 dark:border-slate-800/90 shadow-md dark:shadow-black/20 py-3.5'
+            ? 'bg-white/98 dark:bg-[#0F1720]/98 backdrop-blur-xl border-slate-300 dark:border-[#2A3844] shadow-md py-2.5'
+            : 'bg-white/95 dark:bg-[#0F1720]/95 backdrop-blur-md border-slate-200/90 dark:border-[#2A3844] shadow-md dark:shadow-black/20 py-3.5'
         }`}
       >
         {/* Brand Logo */}
         <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-2.5 shrink-0 group">
-          <div className="w-9 h-9 rounded-xl bg-rq-navy dark:bg-slate-800 flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform border border-slate-700/50">
+          <div className="w-9 h-9 rounded-xl bg-rq-navy dark:bg-[#1A2530] flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform border border-slate-700/50 dark:border-[#2A3844]">
             <span className="text-rq-orange">R</span>Q
           </div>
-          <span className="font-display font-extrabold text-xl text-rq-navy dark:text-white tracking-tight">
+          <span className="font-display font-extrabold text-xl text-rq-navy dark:text-[#E8EDF2] tracking-tight">
             Roll<span className="text-rq-orange">QR</span>
           </span>
         </a>
 
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-6">
-          <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             Home
           </a>
-          <a href="#why-rollqr" onClick={(e) => handleSmoothScroll(e, 'why-rollqr')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#why-rollqr" onClick={(e) => handleSmoothScroll(e, 'why-rollqr')} className="text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             Why RollQR?
           </a>
-          <a href="#where-it-works" onClick={(e) => handleSmoothScroll(e, 'where-it-works')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
-            Learning Spaces
-          </a>
-          <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, 'how-it-works')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, 'how-it-works')} className="text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             How It Works
           </a>
-          <a href="#contact-us" onClick={(e) => handleSmoothScroll(e, 'contact-us')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#contact-us" onClick={(e) => handleSmoothScroll(e, 'contact-us')} className="text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             Contact
           </a>
         </nav>
@@ -116,7 +113,7 @@ function FloatingNavbar({
           <button
             onClick={onToggleTheme}
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center justify-center"
+            className="p-2 rounded-xl bg-slate-100 dark:bg-[#1A2530] text-slate-700 dark:text-[#E8EDF2] hover:bg-slate-200 dark:hover:bg-[#2A3844] transition-colors cursor-pointer flex items-center justify-center border border-transparent dark:border-[#2A3844]"
           >
             <span className="material-symbols-outlined text-[18px]">
               {theme === 'dark' ? 'light_mode' : 'dark_mode'}
@@ -128,14 +125,14 @@ function FloatingNavbar({
             <div className="flex items-center gap-3">
               <button
                 onClick={onNavigateDashboard}
-                className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-rq-navy dark:text-slate-100 text-xs font-bold transition-colors cursor-pointer"
+                className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-[#1A2530] hover:bg-slate-200 dark:hover:bg-[#2A3844] text-rq-navy dark:text-[#E8EDF2] text-xs font-bold transition-colors cursor-pointer border border-transparent dark:border-[#2A3844]"
               >
                 <span className="material-symbols-outlined text-[16px]">dashboard</span>
                 <span>Dashboard</span>
               </button>
 
-              <div className="flex items-center gap-2.5 border-l border-slate-200 dark:border-slate-800 pl-3">
-                <div className="w-8 h-8 rounded-full bg-rq-navy dark:bg-slate-800 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-2 ring-orange-400/30 overflow-hidden">
+              <div className="flex items-center gap-2.5 border-l border-slate-200 dark:border-[#2A3844] pl-3">
+                <div className="w-8 h-8 rounded-full bg-rq-navy dark:bg-[#1A2530] text-white font-bold text-xs flex items-center justify-center shadow-xs ring-2 ring-orange-400/30 border border-transparent dark:border-[#2A3844] overflow-hidden">
                   {teacherPicture ? (
                     <img
                       src={teacherPicture}
@@ -148,7 +145,7 @@ function FloatingNavbar({
                     teacherName ? teacherName.charAt(0).toUpperCase() : 'T'
                   )}
                 </div>
-                <span className="hidden lg:inline text-xs font-bold text-rq-navy dark:text-slate-100 capitalize">
+                <span className="hidden lg:inline text-xs font-bold text-rq-navy dark:text-[#E8EDF2] capitalize">
                   {teacherName}
                 </span>
                 <button
@@ -165,7 +162,7 @@ function FloatingNavbar({
             <div className="flex items-center gap-2.5">
               <button
                 onClick={onNavigateLogin}
-                className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-rq-navy dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-rq-navy dark:text-[#E8EDF2] hover:bg-slate-100 dark:hover:bg-[#1A2530] transition-colors cursor-pointer"
               >
                 Login
               </button>
@@ -198,21 +195,18 @@ function FloatingNavbar({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="pointer-events-auto md:hidden mt-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-4 space-y-3"
+            className="pointer-events-auto md:hidden mt-2 bg-white dark:bg-[#0F1720] rounded-2xl border border-slate-200 dark:border-[#2A3844] shadow-xl p-4 space-y-3"
           >
-            <a href="#" onClick={(e) => { e.preventDefault(); setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#" onClick={(e) => { e.preventDefault(); setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:bg-slate-50 dark:hover:bg-[#1A2530]">
               Home
             </a>
-            <a href="#why-rollqr" onClick={(e) => handleSmoothScroll(e, 'why-rollqr')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#why-rollqr" onClick={(e) => handleSmoothScroll(e, 'why-rollqr')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:bg-slate-50 dark:hover:bg-[#1A2530]">
               Why RollQR?
             </a>
-            <a href="#where-it-works" onClick={(e) => handleSmoothScroll(e, 'where-it-works')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
-              Learning Spaces
-            </a>
-            <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, 'how-it-works')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, 'how-it-works')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:bg-slate-50 dark:hover:bg-[#1A2530]">
               How It Works
             </a>
-            <a href="#contact-us" onClick={(e) => handleSmoothScroll(e, 'contact-us')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#contact-us" onClick={(e) => handleSmoothScroll(e, 'contact-us')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-[#E8EDF2] hover:bg-slate-50 dark:hover:bg-[#1A2530]">
               Contact
             </a>
             {token && (
@@ -411,7 +405,7 @@ export default function HomePage({
   };
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 transition-colors duration-300">
+    <div className="bg-slate-50 dark:bg-[#0F1720] font-sans text-slate-800 dark:text-[#E8EDF2] antialiased min-h-screen flex flex-col selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 transition-colors duration-300">
       {/* Floating Navbar */}
       <FloatingNavbar
         token={token}
@@ -440,15 +434,15 @@ export default function HomePage({
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+              className="bg-white dark:bg-[#1A2530] w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-[#2A3844] overflow-hidden"
             >
-              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-850">
+              <div className="p-6 border-b border-slate-100 dark:border-[#2A3844] flex items-center justify-between bg-slate-50 dark:bg-[#0F1720]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-rq-orange flex items-center justify-center font-bold">
                     <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
                   </div>
                   <div>
-                    <h3 className="font-display font-extrabold text-xl text-rq-navy dark:text-white">Start Attendance</h3>
+                    <h3 className="font-display font-extrabold text-xl text-rq-navy dark:text-[#E8EDF2]">Start Attendance</h3>
                     <p className="text-slate-500 dark:text-slate-400 text-xs">Set up your class and generate a rotating QR code.</p>
                   </div>
                 </div>
@@ -635,20 +629,20 @@ export default function HomePage({
 
           {/* Hero Right Card */}
           <div className="lg:col-span-5 flex justify-center">
-            <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800/90 p-6 sm:p-8 shadow-xl dark:shadow-black/40 relative overflow-hidden text-center space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="w-full max-w-md bg-white dark:bg-[#1A2530] rounded-3xl border border-slate-200/90 dark:border-[#2A3844] p-6 sm:p-8 shadow-xl dark:shadow-black/40 relative overflow-hidden text-center space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#2A3844]">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="font-display font-bold text-xs uppercase tracking-wider text-rq-navy dark:text-slate-200">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span className="font-display font-bold text-xs uppercase tracking-wider text-rq-navy dark:text-[#E8EDF2]">
                     RollQR Live Verification
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
                   Active Security
                 </span>
               </div>
 
-              <div className="bg-slate-900 dark:bg-slate-950 text-white rounded-2xl p-6 shadow-inner space-y-4 border border-slate-800 relative overflow-hidden">
+              <div className="bg-slate-900 dark:bg-[#0F1720] text-white rounded-2xl p-6 shadow-inner space-y-4 border border-slate-800 dark:border-[#2A3844] relative overflow-hidden">
                 <div className="w-12 h-12 rounded-xl bg-rq-orange/20 text-rq-orange mx-auto flex items-center justify-center">
                   <span className="material-symbols-outlined text-[28px]">qr_code_2</span>
                 </div>
