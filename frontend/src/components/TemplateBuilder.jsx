@@ -65,7 +65,7 @@ export default function TemplateBuilder({
               className="px-3.5 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-rq-navy hover:bg-slate-100 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">west</span>
-              <span className="hidden sm:inline">← Back to Home</span>
+              <span className="hidden sm:inline">Back to Home</span>
             </button>
             <button
               onClick={onNavigateDashboard}
@@ -99,7 +99,7 @@ export default function TemplateBuilder({
               <span className="material-symbols-outlined text-[20px]">
                 {showBuilder ? 'close' : 'add'}
               </span>
-              <span>{showBuilder ? 'Close Builder' : '+ Create Template'}</span>
+              <span>{showBuilder ? 'Close Builder' : 'Create Template'}</span>
             </button>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function TemplateBuilder({
                           className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-rq-navy font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[16px]">add</span>
-                          <span>+ Add Field</span>
+                          <span>Add Field</span>
                         </button>
                       </div>
 
@@ -406,7 +406,7 @@ export default function TemplateBuilder({
                   className="px-6 py-3 rounded-xl bg-rq-orange hover:bg-orange-600 text-white font-manrope font-bold text-sm shadow-md transition-all inline-flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[18px]">add</span>
-                  <span>+ Create Template</span>
+                  <span>Create Template</span>
                 </button>
               </div>
             </div>

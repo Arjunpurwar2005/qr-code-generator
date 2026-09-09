@@ -78,7 +78,7 @@ export default function LiveQRSession({
               className="px-3.5 py-1.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">west</span>
-              <span>← Back to Home</span>
+              <span>Back to Home</span>
             </button>
             <button
               onClick={onNavigateDashboard}

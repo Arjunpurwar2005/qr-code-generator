@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import HomePage from './components/HomePage';
 import LoginSignup from './components/LoginSignup';
@@ -27,6 +28,26 @@ function MainApp() {
   const [studentSubmitting, setStudentSubmitting] = useState(false);
   const [studentResult, setStudentResult] = useState(null);
   const [studentError, setStudentError] = useState('');
+
+  // --- THEME STATE (LIGHT / NIGHT MODE) ---
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('rollqr_theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('rollqr_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   // --- TEACHER PORTAL STATE ---
   const [token, setToken] = useState(localStorage.getItem('teacher_token') || '');
@@ -524,149 +545,177 @@ function MainApp() {
     );
   }
 
-  // Application Routes
+  // Application Routes with Smooth Page Transitions
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <HomePage
-            token={token}
-            teacherName={getTeacherName()}
-            activeSession={activeSession}
-            templates={templates}
-            location={teacherLoc}
-            locLoading={teacherLocLoading}
-            classId={classId}
-            setClassId={setClassId}
-            radiusMeters={radiusMeters}
-            setRadiusMeters={setRadiusMeters}
-            selectedTemplateId={selectedTemplateId}
-            setSelectedTemplateId={setSelectedTemplateId}
-            onGetGPSLocation={getGPSLocation}
-            onStartSession={handleStartSession}
-            onEndSession={handleEndSession}
-            onOpenLiveSession={() => navigate('/live')}
-            onNavigateDashboard={() => navigate('/dashboard')}
-            onNavigateSessions={() => navigate('/live')}
-            onNavigateTemplates={() => navigate('/templates')}
-            onNavigateLogin={() => navigate(token ? '/' : '/login')}
-            onNavigateSignup={() => navigate('/login')}
-            onLogout={handleLogout}
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+        className="min-h-screen"
+      >
+        <Routes location={location}>
+          <Route
+            path="/"
+            element={
+              <HomePage
+                token={token}
+                teacherName={getTeacherName()}
+                activeSession={activeSession}
+                pastSessions={pastSessions}
+                templates={templates}
+                location={teacherLoc}
+                locLoading={teacherLocLoading}
+                classId={classId}
+                setClassId={setClassId}
+                radiusMeters={radiusMeters}
+                setRadiusMeters={setRadiusMeters}
+                selectedTemplateId={selectedTemplateId}
+                setSelectedTemplateId={setSelectedTemplateId}
+                onGetGPSLocation={getGPSLocation}
+                onStartSession={handleStartSession}
+                onEndSession={handleEndSession}
+                onOpenLiveSession={() => navigate('/live')}
+                onNavigateDashboard={() => navigate('/dashboard')}
+                onNavigateSessions={() => navigate('/live')}
+                onNavigateTemplates={() => navigate('/templates')}
+                onNavigateLogin={() => navigate(token ? '/' : '/login')}
+                onNavigateSignup={() => navigate('/login')}
+                onLogout={handleLogout}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+              />
+            }
           />
-        }
-      />
-      <Route
-        path="/login"
-        element={
-          <LoginSignup
-            onLogin={handleLogin}
-            onSignup={handleSignup}
-            authError={authError}
-            authSuccess={authSuccess}
-            googleClientId={GOOGLE_CLIENT_ID}
-            googleSigninButtonRef={googleSigninButtonRef}
+          <Route
+            path="/login"
+            element={
+              <LoginSignup
+                onLogin={handleLogin}
+                onSignup={handleSignup}
+                authError={authError}
+                authSuccess={authSuccess}
+                googleClientId={GOOGLE_CLIENT_ID}
+                googleSigninButtonRef={googleSigninButtonRef}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+              />
+            }
           />
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          token ? (
-            <TeacherDashboard
-              teacherName={getTeacherName()}
-              templates={templates}
-              pastSessions={pastSessions}
-              activeSession={activeSession}
-              location={teacherLoc}
-              locLoading={teacherLocLoading}
-              classId={classId}
-              setClassId={setClassId}
-              radiusMeters={radiusMeters}
-              setRadiusMeters={setRadiusMeters}
-              selectedTemplateId={selectedTemplateId}
-              setSelectedTemplateId={setSelectedTemplateId}
-              onGetGPSLocation={getGPSLocation}
-              onStartSession={handleStartSession}
-              onEndSession={handleEndSession}
-              onOpenLiveSession={() => navigate('/live')}
-              onNavigateTab={(tab) => {
-                if (tab === 'templates') navigate('/templates');
-                else if (tab === 'live-session') navigate('/live');
-                else if (tab === 'history' || tab === 'dashboard') navigate('/dashboard');
-              }}
-              onNavigateHome={() => navigate('/')}
-              onDownloadExcel={downloadExcel}
-              onLogout={handleLogout}
-            />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/live"
-        element={
-          token ? (
-            <LiveQRSession
-              activeSession={activeSession}
-              currentToken={currentToken}
-              expiresIn={expiresIn}
-              onEndSession={handleEndSession}
-              onDownloadExcel={downloadExcel}
-              onNavigateDashboard={() => navigate('/dashboard')}
-              onNavigateHome={() => navigate('/')}
-            />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/templates"
-        element={
-          token ? (
-            <TemplateBuilder
-              teacherName={getTeacherName()}
-              templates={templates}
-              newTemplateName={newTemplateName}
-              setNewTemplateName={setNewTemplateName}
-              builderFields={builderFields}
-              setBuilderFields={setBuilderFields}
-              onAddField={handleAddField}
-              onRemoveField={handleRemoveField}
-              onFieldChange={handleFieldChange}
-              onSaveTemplate={handleSaveNewTemplate}
-              onDeleteTemplate={handleDeleteTemplate}
-              onNavigateDashboard={() => navigate('/dashboard')}
-              onNavigateHome={() => navigate('/')}
-              onLogout={handleLogout}
-            />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/scan"
-        element={
-          <StudentAttendanceForm
-            scanSessionId={scanSessionId}
-            studentForm={studentForm}
-            studentResponses={studentResponses}
-            setStudentResponses={setStudentResponses}
-            studentLoc={studentLoc}
-            studentLocLoading={studentLocLoading}
-            studentSubmitting={studentSubmitting}
-            studentResult={studentResult}
-            studentError={studentError}
-            onGetStudentGPS={getStudentGPS}
-            onSubmitStudentAttendance={handleStudentSubmit}
+          <Route
+            path="/dashboard"
+            element={
+              token ? (
+                <TeacherDashboard
+                  teacherName={getTeacherName()}
+                  templates={templates}
+                  pastSessions={pastSessions}
+                  activeSession={activeSession}
+                  location={teacherLoc}
+                  locLoading={teacherLocLoading}
+                  classId={classId}
+                  setClassId={setClassId}
+                  radiusMeters={radiusMeters}
+                  setRadiusMeters={setRadiusMeters}
+                  selectedTemplateId={selectedTemplateId}
+                  setSelectedTemplateId={setSelectedTemplateId}
+                  onGetGPSLocation={getGPSLocation}
+                  onStartSession={handleStartSession}
+                  onEndSession={handleEndSession}
+                  onOpenLiveSession={() => navigate('/live')}
+                  onNavigateTab={(tab) => {
+                    if (tab === 'templates') navigate('/templates');
+                    else if (tab === 'live-session') navigate('/live');
+                    else if (tab === 'history' || tab === 'dashboard') navigate('/dashboard');
+                  }}
+                  onNavigateHome={() => navigate('/')}
+                  onDownloadExcel={downloadExcel}
+                  onLogout={handleLogout}
+                  theme={theme}
+                  onToggleTheme={toggleTheme}
+                />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
           />
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          <Route
+            path="/live"
+            element={
+              token ? (
+                activeSession ? (
+                  <LiveQRSession
+                    activeSession={activeSession}
+                    currentToken={currentToken}
+                    expiresIn={expiresIn}
+                    onEndSession={handleEndSession}
+                    onDownloadExcel={downloadExcel}
+                    onNavigateDashboard={() => navigate('/dashboard')}
+                    onNavigateHome={() => navigate('/')}
+                    theme={theme}
+                    onToggleTheme={toggleTheme}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/templates"
+            element={
+              token ? (
+                <TemplateBuilder
+                  teacherName={getTeacherName()}
+                  templates={templates}
+                  newTemplateName={newTemplateName}
+                  setNewTemplateName={setNewTemplateName}
+                  builderFields={builderFields}
+                  setBuilderFields={setBuilderFields}
+                  onAddField={handleAddField}
+                  onRemoveField={handleRemoveField}
+                  onFieldChange={handleFieldChange}
+                  onSaveTemplate={handleSaveNewTemplate}
+                  onDeleteTemplate={handleDeleteTemplate}
+                  onNavigateDashboard={() => navigate('/dashboard')}
+                  onNavigateHome={() => navigate('/')}
+                  onLogout={handleLogout}
+                  theme={theme}
+                  onToggleTheme={toggleTheme}
+                />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/scan"
+            element={
+              <StudentAttendanceForm
+                scanSessionId={scanSessionId}
+                studentForm={studentForm}
+                studentResponses={studentResponses}
+                setStudentResponses={setStudentResponses}
+                studentLoc={studentLoc}
+                studentLocLoading={studentLocLoading}
+                studentSubmitting={studentSubmitting}
+                studentResult={studentResult}
+                studentError={studentError}
+                onGetStudentGPS={getStudentGPS}
+                onSubmitStudentAttendance={handleStudentSubmit}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+              />
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

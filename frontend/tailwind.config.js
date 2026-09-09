@@ -100,6 +100,7 @@ export default {
         "space-2xl": "3rem"
       },
       fontFamily: {
+        "display": ["'Plus Jakarta Sans'", "Manrope", "sans-serif"],
         "manrope": ["Manrope", "sans-serif"],
         "rq-body": ["Inter", "sans-serif"],
         "body-lg": ["Inter", "sans-serif"],
@@ -109,13 +110,13 @@ export default {
         "label-sm": ["Inter", "sans-serif"],
         "body-md": ["Inter", "sans-serif"],
         "label-md": ["Inter", "sans-serif"],
-        "headline-lg": ["Manrope", "sans-serif"],
-        "display-hero": ["Manrope", "sans-serif"],
-        "headline-lg-mobile": ["Manrope", "sans-serif"],
-        "display-hero-mobile": ["Manrope", "sans-serif"],
-        "headline-md": ["Manrope", "sans-serif"],
+        "headline-lg": ["Plus Jakarta Sans", "Manrope", "sans-serif"],
+        "display-hero": ["Plus Jakarta Sans", "Manrope", "sans-serif"],
+        "headline-lg-mobile": ["Plus Jakarta Sans", "Manrope", "sans-serif"],
+        "display-hero-mobile": ["Plus Jakarta Sans", "Manrope", "sans-serif"],
+        "headline-md": ["Plus Jakarta Sans", "Manrope", "sans-serif"],
         "sans": ["Inter", "sans-serif"],
-        "headline": ["Manrope", "sans-serif"]
+        "headline": ["Plus Jakarta Sans", "Manrope", "sans-serif"]
       },
       fontSize: {
         "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
