@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─────────────────────────────────────────────
@@ -127,6 +127,43 @@ export default function LoginSignup({
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showPass, setShowPass] = useState(false);
+
+  useEffect(() => {
+    if (!googleClientId) return;
+
+    let intervalId = null;
+    const tryRenderGoogleButton = () => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        const btnElem = googleSigninButtonRef?.current || document.getElementById('google-signin-button');
+        if (btnElem) {
+          try {
+            btnElem.innerHTML = '';
+            window.google.accounts.id.renderButton(btnElem, {
+              theme: 'outline',
+              size: 'large',
+              width: 320
+            });
+            return true;
+          } catch (e) {
+            console.error('Google button render error:', e);
+          }
+        }
+      }
+      return false;
+    };
+
+    if (!tryRenderGoogleButton()) {
+      intervalId = setInterval(() => {
+        if (tryRenderGoogleButton()) {
+          clearInterval(intervalId);
+        }
+      }, 250);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [googleClientId, googleSigninButtonRef, mode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
