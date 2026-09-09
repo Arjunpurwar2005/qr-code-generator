@@ -55,7 +55,7 @@ function BrandPanel({ mode }) {
                 <span className="w-2 h-2 rounded-full bg-rq-orange animate-pulse" />
                 <span className="font-sans text-[11px] font-bold text-rq-orange uppercase tracking-widest">Live Session</span>
               </div>
-              <div className="font-manrope font-bold text-white text-sm">KCCITM · CSE 3rd Year</div>
+              <div className="font-manrope font-bold text-white text-sm">CS301 · Data Structures</div>
             </div>
             <div className="text-right">
               <div className="font-manrope font-extrabold text-rq-orange text-2xl">42</div>
@@ -79,39 +79,23 @@ function BrandPanel({ mode }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-1.5 text-white/40 text-xs font-sans">
-            <span className="material-symbols-outlined text-[14px]">smartphone</span>
-            Scan to mark attendance
+          <div className="flex items-center justify-between text-white/50 text-xs">
+            <span>Dynamic Token</span>
+            <span className="text-emerald-400 font-medium">GPS Verified</span>
           </div>
         </motion.div>
-
-        {/* Feature bullets */}
-        <div className="flex flex-col gap-3">
-          {[
-            { icon: 'bolt', text: 'Generate QR in one click' },
-            { icon: 'location_on', text: 'GPS-verified attendance' },
-            { icon: 'download', text: 'Excel export instantly' },
-          ].map(item => (
-            <div key={item.text} className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-rq-orange/15 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[15px] text-rq-orange">{item.icon}</span>
-              </div>
-              <span className="font-sans text-sm text-white/60">{item.text}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* bottom */}
-      <div className="relative z-10">
-        <p className="font-sans text-xs text-white/25">Built for KCCITM · KCC Institute of Technology & Management</p>
+      {/* Footer info */}
+      <div className="relative z-10 space-y-1">
+        <p className="font-sans text-xs text-white/25">Built for modern learning spaces</p>
       </div>
     </div>
   );
 }
 
 /* ─────────────────────────────────────────────
-   MAIN COMPONENT
+   RIGHT PANEL — Form Container
 ───────────────────────────────────────────── */
 export default function LoginSignup({
   onLogin,
@@ -119,7 +103,7 @@ export default function LoginSignup({
   authError,
   authSuccess,
   googleClientId,
-  googleSigninButtonRef,
+  googleSigninButtonRef
 }) {
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
@@ -177,30 +161,30 @@ export default function LoginSignup({
   };
 
   const inputClass =
-    'w-full px-4 py-3 bg-rq-gray border border-rq-gray2 rounded-xl font-sans text-sm text-rq-navy placeholder-rq-muted focus:outline-none focus:border-rq-orange focus:bg-white transition-all duration-200';
+    'w-full px-4 py-3 bg-rq-gray dark:bg-slate-800 border border-rq-gray2 dark:border-slate-700 rounded-xl font-sans text-sm text-rq-navy dark:text-slate-100 placeholder-rq-muted dark:placeholder-slate-400 focus:outline-none focus:border-rq-orange focus:bg-white dark:focus:bg-slate-800 transition-all duration-200';
 
   return (
-    <div className="min-h-screen flex font-sans antialiased">
+    <div className="min-h-screen flex font-sans antialiased bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100">
       {/* LEFT: Brand Panel */}
       <BrandPanel mode={mode} />
 
       {/* RIGHT: Form Panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white dark:bg-slate-950 overflow-y-auto">
         <div className="w-full max-w-[400px]">
           {/* Mobile-only logo */}
           <div className="flex lg:hidden items-center gap-2 mb-10">
             <div className="w-8 h-8 rounded-lg bg-rq-navy flex items-center justify-center">
               <span className="material-symbols-outlined text-[18px] text-rq-orange">qr_code_2</span>
             </div>
-            <span className="font-manrope text-lg font-bold text-rq-navy">RollQR</span>
+            <span className="font-manrope text-lg font-bold text-rq-navy dark:text-white">RollQR</span>
           </div>
 
           {/* Heading */}
           <div className="mb-8">
-            <h1 className="font-manrope text-3xl font-extrabold text-rq-navy mb-2">
+            <h1 className="font-manrope text-3xl font-extrabold text-rq-navy dark:text-white mb-2">
               {mode === 'login' ? 'Teacher Login' : 'Create your account'}
             </h1>
-            <p className="font-sans text-sm text-rq-muted">
+            <p className="font-sans text-sm text-rq-muted dark:text-slate-400">
               {mode === 'login'
                 ? 'Welcome back. Enter your credentials to continue.'
                 : 'Set up your teacher account and start your first session.'}
@@ -212,39 +196,53 @@ export default function LoginSignup({
             {authError && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl mb-5"
+                className="flex items-start gap-2.5 p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl mb-5"
               >
                 <span className="material-symbols-outlined text-[18px] text-red-500 mt-0.5 shrink-0">error</span>
-                <span className="font-sans text-sm text-red-700">{authError}</span>
+                <span className="font-sans text-sm text-red-700 dark:text-red-300">{authError}</span>
               </motion.div>
             )}
             {authSuccess && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="flex items-start gap-2.5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl mb-5"
+                className="flex items-start gap-2.5 p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl mb-5"
               >
                 <span className="material-symbols-outlined text-[18px] text-emerald-600 mt-0.5 shrink-0">check_circle</span>
-                <span className="font-sans text-sm text-emerald-700">{authSuccess}</span>
+                <span className="font-sans text-sm text-emerald-700 dark:text-emerald-300">{authSuccess}</span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Google SSO */}
-          {googleClientId && (
-            <div className="mb-5">
-              <div ref={googleSigninButtonRef} id="google-signin-button" className="w-full flex justify-center" />
-              <div className="flex items-center gap-3 my-4">
-                <div className="flex-1 h-px bg-rq-gray2" />
-                <span className="font-sans text-xs text-rq-muted uppercase tracking-wider font-medium">or</span>
-                <div className="flex-1 h-px bg-rq-gray2" />
-              </div>
+          {/* Google SSO Container */}
+          <div className="mb-5">
+            <div ref={googleSigninButtonRef} id="google-signin-button" className="w-full flex justify-center min-h-[44px]">
+              {!googleClientId && (
+                <button
+                  type="button"
+                  onClick={() => alert('Google Sign-In requires VITE_GOOGLE_CLIENT_ID configuration on the server.')}
+                  className="w-full py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-manrope font-semibold text-sm flex items-center justify-center gap-3 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
+              )}
             </div>
-          )}
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 h-px bg-rq-gray2 dark:bg-slate-800" />
+              <span className="font-sans text-xs text-rq-muted dark:text-slate-400 uppercase tracking-wider font-medium">or</span>
+              <div className="flex-1 h-px bg-rq-gray2 dark:bg-slate-800" />
+            </div>
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="block font-manrope text-xs font-bold text-rq-navy uppercase tracking-wide mb-1.5">
+              <label className="block font-manrope text-xs font-bold text-rq-navy dark:text-slate-200 uppercase tracking-wide mb-1.5">
                 Username <span className="text-rq-orange">*</span>
               </label>
               <input
@@ -266,13 +264,13 @@ export default function LoginSignup({
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <label className="block font-manrope text-xs font-bold text-rq-navy uppercase tracking-wide mb-1.5">
+                  <label className="block font-manrope text-xs font-bold text-rq-navy dark:text-slate-200 uppercase tracking-wide mb-1.5">
                     Email Address <span className="text-rq-orange">*</span>
                   </label>
                   <input
                     type="email"
                     required={mode === 'signup'}
-                    placeholder="prof.sharma@kccitm.ac.in"
+                    placeholder="prof.sharma@institution.edu"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={inputClass}
@@ -282,7 +280,7 @@ export default function LoginSignup({
             </AnimatePresence>
 
             <div>
-              <label className="block font-manrope text-xs font-bold text-rq-navy uppercase tracking-wide mb-1.5">
+              <label className="block font-manrope text-xs font-bold text-rq-navy dark:text-slate-200 uppercase tracking-wide mb-1.5">
                 Password <span className="text-rq-orange">*</span>
               </label>
               <div className="relative">
@@ -297,7 +295,7 @@ export default function LoginSignup({
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-rq-muted hover:text-rq-navy transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-rq-muted dark:text-slate-400 hover:text-rq-navy dark:hover:text-white transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">
                     {showPass ? 'visibility_off' : 'visibility'}
@@ -316,34 +314,30 @@ export default function LoginSignup({
               {submitting && (
                 <motion.span
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                  className="material-symbols-outlined text-[18px]"
-                >
-                  progress_activity
-                </motion.span>
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full inline-block"
+                />
               )}
-              {mode === 'login' ? 'Login →' : 'Create Account →'}
+              <span>{mode === 'login' ? 'Login to Dashboard' : 'Create Teacher Account'}</span>
             </motion.button>
           </form>
 
-          {/* Mode switcher */}
-          <p className="mt-6 text-center font-sans text-sm text-rq-muted">
-            {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+          {/* Toggle mode */}
+          <div className="mt-6 text-center">
             <button
-              type="button"
-              onClick={() => {
-                setMode(mode === 'login' ? 'signup' : 'login');
-              }}
-              className="font-semibold text-rq-orange hover:underline transition-colors"
+              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+              className="font-sans text-xs text-rq-muted dark:text-slate-400 hover:text-rq-navy dark:hover:text-white transition-colors cursor-pointer"
             >
-              {mode === 'login' ? 'Create account' : 'Login'}
+              {mode === 'login' ? (
+                <>New teacher? <span className="text-rq-orange font-bold hover:underline">Create account</span></>
+              ) : (
+                <>Already registered? <span className="text-rq-orange font-bold hover:underline">Log in</span></>
+              )}
             </button>
-          </p>
+          </div>
 
-          {/* Trust note */}
-          <div className="mt-8 pt-6 border-t border-rq-gray2 flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-[18px] text-rq-muted">lock</span>
-            <span className="font-sans text-xs text-rq-muted">Teacher accounts only · JWT secured · Built for KCCITM</span>
+          <div className="mt-8 text-center border-t border-rq-gray2 dark:border-slate-800 pt-5">
+            <span className="font-sans text-xs text-rq-muted dark:text-slate-500">Teacher accounts only · JWT secured · Built for modern learning spaces</span>
           </div>
         </div>
       </div>

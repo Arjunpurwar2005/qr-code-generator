@@ -18,7 +18,7 @@ export default {
         "rq-gray":   "#F5F6F8",
         "rq-gray2":  "#E4E7EC",
         "rq-muted":  "#667085",
-        "rq-red":    "#DC2626",   /* KCCITM brand red */
+        "rq-red":    "#DC2626",
         /* ── Original tokens (kept for dashboard) ──────── */
 
         "on-primary-fixed": "#0b1d2b",
