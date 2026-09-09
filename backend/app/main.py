@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from sqlalchemy import text
 from app.core.database import engine, Base
 import app.models.db_models
 from app.routes.auth import router as auth_router
@@ -20,7 +21,7 @@ def run_migrations():
             "ALTER TABLE teachers ADD COLUMN IF NOT EXISTS profile_picture VARCHAR;",
         ]
         for stmt in migrations:
-            conn.execute(stmt)
+            conn.execute(text(stmt))
         conn.commit()
 
 run_migrations()
