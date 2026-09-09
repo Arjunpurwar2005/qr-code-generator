@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─────────────────────────────────────────────
-   DYNAMIC TYPING GREETING COMPONENT (Req #2)
+   DYNAMIC TYPING GREETING COMPONENT
 ───────────────────────────────────────────── */
 function TypingGreeting({ teacherName }) {
   const fullText = `Hello, ${teacherName}`;
@@ -42,7 +42,7 @@ function TypingGreeting({ teacherName }) {
 }
 
 /* ─────────────────────────────────────────────
-   NAVBAR COMPONENT (Req #3, #15)
+   NAVBAR COMPONENT (Smooth Section Navigation)
 ───────────────────────────────────────────── */
 function FloatingNavbar({
   token,
@@ -62,6 +62,15 @@ function FloatingNavbar({
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
+  const handleSmoothScroll = (e, targetId) => {
+    e.preventDefault();
+    setMobileOpen(false);
+    const elem = document.getElementById(targetId);
+    if (elem) {
+      elem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <header className="fixed top-0 inset-x-0 z-50 pointer-events-none px-4 sm:px-6 lg:px-8 pt-3 md:pt-4 max-w-7xl mx-auto">
       <div
@@ -72,7 +81,7 @@ function FloatingNavbar({
         }`}
       >
         {/* Brand Logo */}
-        <a href="#" className="flex items-center gap-2.5 shrink-0 group">
+        <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-2.5 shrink-0 group">
           <div className="w-9 h-9 rounded-xl bg-rq-navy dark:bg-slate-800 flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform border border-slate-700/50">
             <span className="text-rq-orange">R</span>Q
           </div>
@@ -83,20 +92,20 @@ function FloatingNavbar({
 
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-6">
-          <a href="#" className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             Home
           </a>
-          <a href="#why-rollqr" className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#why-rollqr" onClick={(e) => handleSmoothScroll(e, 'why-rollqr')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             Why RollQR?
           </a>
-          <a href="#where-it-works" className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#where-it-works" onClick={(e) => handleSmoothScroll(e, 'where-it-works')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             Learning Spaces
           </a>
-          <a href="#how-it-works" className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+          <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, 'how-it-works')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
             How It Works
           </a>
-          <a href="#about-rollqr" className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
-            About
+          <a href="#contact-us" onClick={(e) => handleSmoothScroll(e, 'contact-us')} className="text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-rq-orange dark:hover:text-rq-orange transition-colors">
+            Contact
           </a>
         </nav>
 
@@ -180,20 +189,20 @@ function FloatingNavbar({
             exit={{ opacity: 0, y: -10 }}
             className="pointer-events-auto md:hidden mt-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl p-4 space-y-3"
           >
-            <a href="#" onClick={() => setMobileOpen(false)} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#" onClick={(e) => { e.preventDefault(); setMobileOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
               Home
             </a>
-            <a href="#why-rollqr" onClick={() => setMobileOpen(false)} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#why-rollqr" onClick={(e) => handleSmoothScroll(e, 'why-rollqr')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
               Why RollQR?
             </a>
-            <a href="#where-it-works" onClick={() => setMobileOpen(false)} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#where-it-works" onClick={(e) => handleSmoothScroll(e, 'where-it-works')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
               Learning Spaces
             </a>
-            <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            <a href="#how-it-works" onClick={(e) => handleSmoothScroll(e, 'how-it-works')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
               How It Works
             </a>
-            <a href="#about-rollqr" onClick={() => setMobileOpen(false)} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
-              About
+            <a href="#contact-us" onClick={(e) => handleSmoothScroll(e, 'contact-us')} className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+              Contact
             </a>
             {token && (
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
@@ -219,7 +228,7 @@ function FloatingNavbar({
 }
 
 /* ─────────────────────────────────────────────
-   LEARNING SPACES MARQUEE DATA (Req #7)
+   LEARNING SPACES MARQUEE DATA
 ───────────────────────────────────────────── */
 const LEARNING_SPACES = [
   {
@@ -267,17 +276,82 @@ const LEARNING_SPACES = [
 ];
 
 /* ─────────────────────────────────────────────
-   RESTORED HOW IT WORKS DATA (Req #8)
+   RESTORED ORIGINAL 3-STEP HOW IT WORKS DATA & DIAGRAMS (Req #4)
 ───────────────────────────────────────────── */
-const HOW_IT_WORKS_STEPS = [
-  { step: '01', title: 'Teacher Logs In', desc: 'Faculty authenticates securely into their personal RollQR dashboard.' },
-  { step: '02', title: 'Select Template', desc: 'Choose a saved class template or build custom form fields.' },
-  { step: '03', title: 'Capture GPS Center', desc: 'Teacher verifies current location to establish geofence perimeter.' },
-  { step: '04', title: 'QR Code Rotates', desc: 'Live HMAC-SHA256 token changes automatically every 30 seconds.' },
-  { step: '05', title: 'Students Scan QR', desc: 'Students scan using phone camera without installing any app.' },
-  { step: '06', title: '3-Layer Security', desc: 'System checks location boundary, device ID, and unique Roll No.' },
-  { step: '07', title: 'End Session', desc: 'Teacher locks attendance with one click when lecture completes.' },
-  { step: '08', title: 'Excel Export', desc: 'Instant downloadable .xlsx report formatted with timestamps.' }
+const HOW_IT_WORKS_3STEPS = [
+  {
+    step: 'STEP 01',
+    title: 'Teacher creates / selects a template',
+    description: 'Faculty configures the subject name, geofence radius, and picks a custom form template or standard roll preset.',
+    badge: '01 · Setup',
+    diagram: (
+      <div className="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-2.5 shadow-inner">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-rq-orange">Class Setup</span>
+          <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Radius: 30m</span>
+        </div>
+        <div className="space-y-1.5 text-left text-xs">
+          <div className="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 font-mono text-[11px] text-slate-200">
+            CS301 Data Structures
+          </div>
+          <div className="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-[11px] text-slate-300 flex items-center justify-between">
+            <span>Roll Number, Student Name</span>
+            <span className="text-rq-orange text-[10px]">Preset</span>
+          </div>
+        </div>
+      </div>
+    )
+  },
+  {
+    step: 'STEP 02',
+    title: 'Students scan the QR code',
+    description: 'A dynamic rolling QR code displays on screen, refreshing every 30 seconds. Students scan using any smartphone camera.',
+    badge: '02 · Live Scan',
+    diagram: (
+      <div className="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-2.5 shadow-inner">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Rotating HMAC Token</span>
+          <span className="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded font-mono">⏱ 30s</span>
+        </div>
+        <div className="flex items-center justify-center gap-3 py-1">
+          <div className="w-14 h-14 bg-white p-1 rounded-xl shadow-md flex items-center justify-center shrink-0">
+            <div className="w-full h-full bg-slate-900 rounded-lg flex items-center justify-center text-white">
+              <span className="material-symbols-outlined text-[24px]">qr_code_2</span>
+            </div>
+          </div>
+          <div className="text-left text-[11px] space-y-0.5">
+            <div className="text-white font-bold">No App Install</div>
+            <div className="text-slate-400">Instant camera scan</div>
+            <div className="text-emerald-400 text-[10px] font-semibold">📍 GPS Geofence Check</div>
+          </div>
+        </div>
+      </div>
+    )
+  },
+  {
+    step: 'STEP 03',
+    title: 'Attendance completed / Excel ready',
+    description: '3-layer security checks location, device ID, and unique Roll No. Teacher locks the session and exports the Excel roster.',
+    badge: '03 · Export',
+    diagram: (
+      <div className="bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 space-y-2.5 shadow-inner">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Live Roster</span>
+          <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded">42 Present</span>
+        </div>
+        <div className="space-y-1.5 text-left text-xs">
+          <div className="flex items-center justify-between text-[11px] bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700">
+            <span className="font-mono text-slate-300">CS202401 · Rahul S.</span>
+            <span className="text-emerald-400 font-bold text-[10px]">PRESENT</span>
+          </div>
+          <div className="bg-emerald-600 text-white text-[11px] font-bold py-1.5 rounded-lg flex items-center justify-center gap-1.5 shadow-sm">
+            <span className="material-symbols-outlined text-[14px]">download</span>
+            <span>Download Attendance.xlsx</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 ];
 
 /* ─────────────────────────────────────────────
@@ -314,7 +388,7 @@ export default function HomePage({
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [contactSuccess, setContactSuccess] = useState(false);
 
-  // Check if session links should be visible (Req #6)
+  // Check if session links should be visible
   const hasSessions = Boolean(activeSession || (pastSessions && pastSessions.length > 0));
 
   const handleContactSubmit = (e) => {
@@ -487,7 +561,7 @@ export default function HomePage({
           {/* Hero Left Content */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             {token ? (
-              /* Personalized Teacher Hero Greeting with Typing Animation (Req #2) */
+              /* Personalized Teacher Hero Greeting */
               <div className="space-y-4">
                 <TypingGreeting teacherName={teacherName} />
                 <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
@@ -511,7 +585,7 @@ export default function HomePage({
                 </div>
               </div>
             ) : (
-              /* Public Visitor Hero with Memorable Tagline (Req #5) */
+              /* Public Visitor Hero */
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -524,7 +598,7 @@ export default function HomePage({
                   </span>
                 </h1>
                 <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                  Fast, fraud-proof classroom attendance powered by dynamic rolling QR codes and GPS geofence verification. Built for colleges, universities &amp; schools.
+                  Fast, fraud-proof classroom attendance powered by dynamic rolling QR codes and GPS geofence verification. Built for modern learning spaces.
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                   <button
@@ -674,7 +748,7 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Logged-In Teacher Workspace Modules (Req #6: Only show Sessions if relevant) */}
+      {/* Logged-In Teacher Workspace Modules */}
       {token && (
         <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
@@ -709,7 +783,7 @@ export default function HomePage({
               </div>
             </div>
 
-            {/* Sessions (Shown ONLY when activeSession or pastSessions exist - Req #6) */}
+            {/* Sessions (Shown ONLY when activeSession or pastSessions exist) */}
             {hasSessions && (
               <div
                 onClick={onNavigateSessions}
@@ -758,7 +832,7 @@ export default function HomePage({
         </section>
       )}
 
-      {/* Built for Learning Spaces — Continuous Visual Marquee Showcase (Req #7) */}
+      {/* Built for Learning Spaces — Continuous Visual Marquee Showcase */}
       <section id="where-it-works" className="py-16 md:py-24 bg-slate-100/80 dark:bg-slate-950 border-b border-slate-200/80 dark:border-slate-800 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-center">
           <div className="max-w-3xl mx-auto space-y-3">
@@ -812,122 +886,59 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Restored & Improved "How It Works" Section (Req #8) */}
+      {/* RESTORED ORIGINAL 3-STEP "HOW ROLLQR WORKS" SECTION (Req #4) */}
       <section id="how-it-works" className="py-16 md:py-24 bg-white dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 text-rq-orange text-xs font-bold uppercase tracking-wider">
-              <span>Workflow</span>
+              <span>3 Simple Steps</span>
             </div>
             <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-rq-navy dark:text-white tracking-tight">
               How RollQR Works
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-base">
-              A transparent, step-by-step visual look at the complete attendance lifecycle.
+              A clean 3-step workflow with visual diagrams designed for instant classroom attendance.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {HOW_IT_WORKS_STEPS.map((item, idx) => (
+          {/* 3 Step Visual Diagram Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {HOW_IT_WORKS_3STEPS.map((stepItem, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 hover:border-orange-300 dark:hover:border-orange-500/50 shadow-xs hover:shadow-md transition-all group"
+                className="bg-slate-50 dark:bg-slate-950 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm hover:shadow-md hover:border-orange-300 dark:hover:border-orange-500/50 transition-all flex flex-col justify-between relative"
               >
-                <div className="flex items-center justify-between">
-                  <span className="w-9 h-9 rounded-xl bg-rq-navy dark:bg-rq-orange text-white font-display font-bold text-sm flex items-center justify-center shadow-xs">
-                    {item.step}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                    Step {idx + 1}
-                  </span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 rounded-full bg-rq-orange/15 text-rq-orange font-display font-extrabold text-xs tracking-wider">
+                      {stepItem.step}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                      {stepItem.badge}
+                    </span>
+                  </div>
+
+                  <h3 className="font-display font-bold text-xl text-rq-navy dark:text-white leading-snug">
+                    {stepItem.title}
+                  </h3>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {stepItem.description}
+                  </p>
                 </div>
-                <h3 className="font-display font-bold text-lg text-rq-navy dark:text-white leading-snug">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {item.desc}
-                </p>
+
+                {/* Visual Diagram Element */}
+                <div className="pt-2">
+                  {stepItem.diagram}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* About Section: Meet the People Behind RollQR (Req #13) */}
-      <section id="about-rollqr" className="py-16 md:py-20 bg-slate-100/70 dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold uppercase tracking-wider">
-              <span>Creators</span>
-            </div>
-            <h2 className="font-display font-extrabold text-3xl text-rq-navy dark:text-white tracking-tight">
-              Meet the People Behind RollQR
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">
-              Handcrafted for modern classrooms with a focus on speed, security, and simplicity.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Card 1 */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-md flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rq-orange to-amber-500 text-white font-display font-extrabold text-2xl flex items-center justify-center shrink-0 shadow-md ring-4 ring-orange-100 dark:ring-orange-950">
-                AP
-              </div>
-              <div className="space-y-2 flex-1">
-                <div>
-                  <h3 className="font-display font-extrabold text-xl text-rq-navy dark:text-white">Arjun Purwar</h3>
-                  <div className="text-xs font-bold text-rq-orange uppercase tracking-wider">Full Stack &amp; Core Architect</div>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Designed RollQR's fraud-proof rolling token algorithm, geofence calculation engine, and backend architecture.
-                </p>
-                <div className="pt-2">
-                  <a
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-rq-orange dark:hover:text-rq-orange transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">link</span>
-                    <span>LinkedIn Profile</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-md flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rq-navy to-slate-800 text-white font-display font-extrabold text-2xl flex items-center justify-center shrink-0 shadow-md ring-4 ring-slate-200 dark:ring-slate-800">
-                S
-              </div>
-              <div className="space-y-2 flex-1">
-                <div>
-                  <h3 className="font-display font-extrabold text-xl text-rq-navy dark:text-white">Sagar</h3>
-                  <div className="text-xs font-bold text-rq-orange uppercase tracking-wider">Frontend &amp; Systems Engineer</div>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Built RollQR's responsive design system, theme modes, student scanning view, and intuitive faculty controls.
-                </p>
-                <div className="pt-2">
-                  <a
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-rq-orange dark:hover:text-rq-orange transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">link</span>
-                    <span>LinkedIn Profile</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Temporary Contact Us Form (Req #14) */}
-      <section className="py-16 md:py-20 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
+      {/* Temporary Contact Us Form */}
+      <section id="contact-us" className="py-16 md:py-20 bg-slate-100/70 dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 text-rq-orange text-xs font-bold uppercase tracking-wider">
@@ -941,7 +952,7 @@ export default function HomePage({
             </p>
           </div>
 
-          <form onSubmit={handleContactSubmit} className="bg-slate-50 dark:bg-slate-950 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+          <form onSubmit={handleContactSubmit} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
             {contactSuccess && (
               <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px]">check_circle</span>
@@ -958,7 +969,7 @@ export default function HomePage({
                   placeholder="Your Name"
                   value={contactForm.name}
                   onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs outline-none focus:border-rq-orange"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs outline-none focus:border-rq-orange"
                 />
               </div>
               <div className="space-y-1">
@@ -969,7 +980,7 @@ export default function HomePage({
                   placeholder="you@institution.edu"
                   value={contactForm.email}
                   onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs outline-none focus:border-rq-orange"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs outline-none focus:border-rq-orange"
                 />
               </div>
             </div>
@@ -982,7 +993,7 @@ export default function HomePage({
                 placeholder="How can we help you?"
                 value={contactForm.message}
                 onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs outline-none focus:border-rq-orange"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs outline-none focus:border-rq-orange"
               />
             </div>
 
@@ -996,21 +1007,68 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer WITH Integrated Compact Profile/About Cards (Req #1) */}
       <footer className="bg-rq-navy dark:bg-slate-950 text-white py-12 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-rq-orange text-white font-bold flex items-center justify-center text-sm">
-              RQ
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          {/* Integrated Compact About Us Subsection */}
+          <div id="about-rollqr" className="border-b border-slate-800 pb-10 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h3 className="font-display font-bold text-xs uppercase tracking-widest text-slate-400">
+                About Us — Meet the People Behind RollQR
+              </h3>
+              <span className="text-xs text-slate-500">Handcrafted for modern learning spaces</span>
             </div>
-            <span className="font-display font-extrabold text-lg tracking-tight">
-              Roll<span className="text-rq-orange">QR</span>
-            </span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Profile Card 1 */}
+              <div className="bg-slate-900/90 dark:bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4 text-left shadow-md">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-rq-orange to-amber-500 text-white font-display font-extrabold text-lg flex items-center justify-center shrink-0 shadow-md">
+                  AP
+                </div>
+                <div className="space-y-1 overflow-hidden">
+                  <h4 className="font-display font-bold text-base text-white">Arjun Purwar</h4>
+                  <div className="text-[11px] font-bold text-rq-orange uppercase tracking-wider">Full Stack &amp; Core Architect</div>
+                  <p className="text-xs text-slate-400 leading-snug">Designed RollQR's rolling token algorithm, geofence engine &amp; backend architecture.</p>
+                  <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-rq-orange transition-colors pt-1">
+                    <span className="material-symbols-outlined text-[14px]">link</span>
+                    <span>LinkedIn Profile</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Profile Card 2 */}
+              <div className="bg-slate-900/90 dark:bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4 text-left shadow-md">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rq-navy to-slate-800 text-white font-display font-extrabold text-lg flex items-center justify-center shrink-0 shadow-md border border-slate-700">
+                  S
+                </div>
+                <div className="space-y-1 overflow-hidden">
+                  <h4 className="font-display font-bold text-base text-white">Sagar</h4>
+                  <div className="text-[11px] font-bold text-rq-orange uppercase tracking-wider">Frontend &amp; Systems Engineer</div>
+                  <p className="text-xs text-slate-400 leading-snug">Built RollQR's responsive design system, theme modes, scanning UI &amp; faculty controls.</p>
+                  <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-rq-orange transition-colors pt-1">
+                    <span className="material-symbols-outlined text-[14px]">link</span>
+                    <span>LinkedIn Profile</span>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <p className="text-xs text-slate-400">
-            © {new Date().getFullYear()} RollQR Attendance Platform. All rights reserved.
-          </p>
+          {/* Bottom Footer Row */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-rq-orange text-white font-bold flex items-center justify-center text-sm">
+                RQ
+              </div>
+              <span className="font-display font-extrabold text-lg tracking-tight">
+                Roll<span className="text-rq-orange">QR</span>
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              © {new Date().getFullYear()} RollQR Attendance Platform. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
